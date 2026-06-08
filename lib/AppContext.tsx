@@ -51,7 +51,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const loadUserData = async () => {
     const [me, lists] = await Promise.all([usersApi.me(), listsApi.index()])
-    if (me.monthly_savings_goal) setGoal(me.monthly_savings_goal)
+    if (me.monthly_savings_goal) setGoal(Number(me.monthly_savings_goal))
     setSaved(me.saved_this_month)
     setShops(me.shops_this_month)
     if (lists.length > 0) {

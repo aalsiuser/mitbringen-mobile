@@ -28,7 +28,7 @@ export const CATALOG: Product[] = [
   { id: 'lachs',     name: 'Räucherlachs',        unit: '100 g',  cat: 'Fisch',     regular: 3.99, promo: 2.79, store: 'spar',  emoji: '🐟' },
 ]
 
-export const fmt = (n: number) => '€' + n.toFixed(2)
+export const fmt = (n: number) => '€' + Number(n).toFixed(2)
 export const savingsOf = (p: Product) => Math.max(0, p.regular - p.promo)
 
 export function optimiseBasket(items: Product[]): BasketPlan {

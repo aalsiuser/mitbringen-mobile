@@ -38,8 +38,8 @@ export default function StoreRecScreen() {
       .finally(() => setLoading(false))
   }, [currentListId])
 
-  const handleBank = () => {
-    bankSavings(result?.total_saving ?? 0)
+  const handleBank = async () => {
+    await bankSavings(result?.total_saving ?? 0)
     router.replace('/(tabs)')
   }
 

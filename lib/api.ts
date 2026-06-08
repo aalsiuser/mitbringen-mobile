@@ -1,6 +1,6 @@
 import { getItemAsync, setItemAsync, deleteItemAsync } from 'expo-secure-store'
 
-const BASE_URL = 'http://10.0.2.2:3000/api/v1'
+const BASE_URL = 'http://192.168.0.160:3000/api/v1'
 const TOKEN_KEY = 'auth_token'
 
 export async function getToken() {
