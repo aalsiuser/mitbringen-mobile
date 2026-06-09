@@ -74,7 +74,7 @@ export default function ListTab() {
             placeholder='Add an item — try "Milch", "Bier"…'
             placeholderTextColor={Colors.ink3}
             onFocus={() => setFocused(true)}
-            onBlur={() => setFocused(false)}
+            onBlur={() => setTimeout(() => setFocused(false), 200)}
             returnKeyType="done"
             onSubmitEditing={() => results[0] && handleAdd(results[0])}
           />
