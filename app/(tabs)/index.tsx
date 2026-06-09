@@ -70,7 +70,7 @@ export default function HomeTab() {
             <View style={s.soonPill}><Text style={s.soonText}>SOON</Text></View>
             <View style={s.assistantIcon}><Text style={{ fontSize: 19 }}>💬</Text></View>
             <Text style={s.assistantTitle}>Assistant</Text>
-            <Text style={s.assistantSub}>Ask anything in Vienna</Text>
+            <Text style={s.assistantSub}>Ask anything{'\n'}in Vienna</Text>
           </TouchableOpacity>
         </View>
 
@@ -107,7 +107,7 @@ const s = StyleSheet.create({
   content: { paddingHorizontal: 22, paddingBottom: 24 },
   hero: { alignItems: 'center', paddingTop: 20, paddingBottom: 8 },
   eyebrow: { fontSize: 11.5, fontWeight: '700', letterSpacing: 1.5, textTransform: 'uppercase', color: Colors.ink3, fontFamily: 'HankenGrotesk_700Bold' },
-  justBankedPill: { position: 'absolute', top: -14, right: -44, backgroundColor: Colors.green, paddingHorizontal: 11, paddingVertical: 5, borderRadius: 999 },
+  justBankedPill: { position: 'absolute', top: -14, right: -54, backgroundColor: Colors.green, paddingHorizontal: 11, paddingVertical: 5, borderRadius: 999, shadowColor: Colors.green, shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.5, shadowRadius: 10, elevation: 6 },
   justBankedText: { color: '#fff', fontSize: 13, fontWeight: '700', fontFamily: 'HankenGrotesk_700Bold' },
   progressLabels: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 10 },
   progressLabel: { fontSize: 13.5, fontWeight: '600', fontFamily: 'HankenGrotesk_600SemiBold' },
@@ -118,7 +118,7 @@ const s = StyleSheet.create({
   statEyebrow: { fontSize: 10.5, fontWeight: '700', letterSpacing: 1.2, textTransform: 'uppercase', color: Colors.ink3, fontFamily: 'HankenGrotesk_700Bold' },
   statNum: { fontSize: 28, fontWeight: '600', marginTop: 6, color: Colors.ink, fontFamily: 'SpaceGrotesk_600SemiBold' },
   statSub: { fontSize: 12.5, color: Colors.ink3, marginTop: 2, fontFamily: 'HankenGrotesk_400Regular' },
-  assistantCard: { overflow: 'hidden' },
+  assistantCard: { overflow: 'hidden', backgroundColor: Colors.greenTint },
   soonPill: { position: 'absolute', top: 13, right: 13, backgroundColor: Colors.amberSoft, paddingHorizontal: 8, paddingVertical: 3, borderRadius: 999 },
   soonText: { fontSize: 10, fontWeight: '800', letterSpacing: 0.6, color: Colors.amber, fontFamily: 'HankenGrotesk_700Bold' },
   assistantIcon: { width: 34, height: 34, borderRadius: 11, backgroundColor: Colors.greenSoft, alignItems: 'center', justifyContent: 'center' },

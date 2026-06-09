@@ -156,8 +156,10 @@ function ItemRow({ item, onRemove }: { item: ListItem; onRemove: (id: number) =>
 
   return (
     <View style={s.itemRow}>
-      <View style={[s.itemColorBar, { backgroundColor: color }]} />
-      <View style={{ flex: 1 }}>
+      <View style={s.itemTile}>
+        <Text style={s.itemTileLetter}>{item.name[0].toUpperCase()}</Text>
+      </View>
+      <View style={{ flex: 1, minWidth: 0 }}>
         <Text style={s.itemName} numberOfLines={1}>{item.name}</Text>
         <View style={s.itemMeta}>
           {bp ? (
@@ -172,9 +174,9 @@ function ItemRow({ item, onRemove }: { item: ListItem; onRemove: (id: number) =>
       </View>
       <View style={{ alignItems: 'flex-end', marginRight: 8 }}>
         <Text style={s.itemPromo}>{fmt(bp?.promo_price)}</Text>
-        {bp?.regular_price && (
+        {bp?.regular_price ? (
           <Text style={s.itemRegular}>{fmt(bp.regular_price)}</Text>
-        )}
+        ) : null}
       </View>
       <TouchableOpacity onPress={() => onRemove(item.id)} style={s.trashBtn} activeOpacity={0.7}>
         <Text style={{ fontSize: 16, color: Colors.ink3 }}>🗑</Text>
@@ -205,8 +207,9 @@ const s = StyleSheet.create({
   emptyIcon: { width: 64, height: 64, borderRadius: 20, backgroundColor: Colors.greenTint, alignItems: 'center', justifyContent: 'center' },
   emptyTitle: { marginTop: 16, fontSize: 15, fontWeight: '600', color: Colors.ink2, fontFamily: 'HankenGrotesk_600SemiBold' },
   emptySub: { marginTop: 4, fontSize: 13.5, color: Colors.ink3, textAlign: 'center', fontFamily: 'HankenGrotesk_400Regular' },
-  itemRow: { backgroundColor: Colors.card, borderRadius: 22, padding: 14, flexDirection: 'row', alignItems: 'center', gap: 12, overflow: 'hidden', ...Shadows.card },
-  itemColorBar: { width: 4, height: '100%', borderRadius: 4, position: 'absolute', left: 0, top: 0, bottom: 0 },
+  itemRow: { backgroundColor: Colors.card, borderRadius: 22, padding: 14, flexDirection: 'row', alignItems: 'center', gap: 12, ...Shadows.card },
+  itemTile: { width: 40, height: 40, borderRadius: 12, backgroundColor: Colors.greenTint, alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
+  itemTileLetter: { fontSize: 16, fontWeight: '700', color: Colors.green, fontFamily: 'HankenGrotesk_700Bold' },
   itemName: { fontSize: 15.5, fontWeight: '600', color: Colors.ink, fontFamily: 'HankenGrotesk_600SemiBold' },
   itemMeta: { flexDirection: 'row', alignItems: 'center', gap: 7, marginTop: 4 },
   itemUnit: { fontSize: 12.5, color: Colors.ink3, fontWeight: '600', fontFamily: 'HankenGrotesk_600SemiBold' },
