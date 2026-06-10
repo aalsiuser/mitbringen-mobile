@@ -1,18 +1,19 @@
 import { useEffect, useState, useMemo } from 'react'
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native'
+import { LinearGradient } from 'expo-linear-gradient'
 import { useRouter } from 'expo-router'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { Colors, Shadows } from '@/constants/colors'
-import { MoneyHero } from '@/components/ui/MoneyHero'
 import { useApp } from '@/lib/AppContext'
 import { api } from '@/lib/api'
+import { useTween } from '@/hooks/useTween'
 
 const STORE_COLORS: Record<string, string> = {
-  hofer:      '#d8462a',
-  lidl:       '#2a64b4',
-  spar:       '#1f8a5b',
-  billa:      '#e0a43a',
-  billa_plus: '#e0a43a',
+  hofer:      Colors.store.hofer,
+  lidl:       Colors.store.lidl,
+  spar:       Colors.store.spar,
+  billa:      Colors.store.billa,
+  billa_plus: Colors.store.billa_plus,
 }
 
 const fmt = (n: number | null | undefined) => n != null ? '€' + Number(n).toFixed(2) : '—'
@@ -42,6 +43,20 @@ interface OptimiseResult {
   total_saving: number
   items_covered: number
   total_items: number
+}
+
+function BigSaving({ value }: { value: number }) {
+  const v = useTween(value)
+  const safe = Math.max(0, v)
+  const int = Math.floor(safe)
+  const dec = Math.round((safe - int) * 100).toString().padStart(2, '0')
+  return (
+    <View style={{ flexDirection: 'row', alignItems: 'flex-start' }}>
+      <Text style={[s.heroEuroSign, { color: '#fff' }]}>€</Text>
+      <Text style={[s.heroAmount, { color: '#fff' }]}>{int}</Text>
+      <Text style={[s.heroCents, { color: '#fff' }]}>,{dec}</Text>
+    </View>
+  )
 }
 
 export default function StoreRecScreen() {
@@ -77,8 +92,9 @@ export default function StoreRecScreen() {
 
   return (
     <SafeAreaView style={s.root} edges={['top']}>
+      {/* Back header */}
       <View style={s.header}>
-        <TouchableOpacity onPress={() => router.back()} style={s.backBtn}>
+        <TouchableOpacity onPress={() => router.back()} style={s.backBtn} activeOpacity={0.7}>
           <Text style={s.backText}>← Back</Text>
         </TouchableOpacity>
         <Text style={s.headerTitle}>Where to shop</Text>
@@ -87,7 +103,7 @@ export default function StoreRecScreen() {
 
       {loading ? (
         <View style={s.centered}>
-          <ActivityIndicator size="large" color={Colors.green} />
+          <ActivityIndicator size="large" color={Colors.blue} />
           <Text style={s.loadingText}>Finding best deals…</Text>
         </View>
       ) : !result || stops.length === 0 ? (
@@ -97,18 +113,23 @@ export default function StoreRecScreen() {
       ) : (
         <>
           <ScrollView style={{ flex: 1 }} contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
-            {/* Hero */}
-            <View style={s.heroCard}>
-              <Text style={[s.eyebrow, { color: Colors.green }]}>Most you can save</Text>
-              <View style={{ alignItems: 'center', marginTop: 10 }}>
-                <MoneyHero value={result.total_saving} size={64} />
-              </View>
+            {/* Blue summary hero */}
+            <LinearGradient
+              colors={['#2f6bff', '#1d4fe6', '#1a44c8']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={s.heroCard}
+            >
+              <View style={s.decCircle1} />
+              <View style={s.decCircle2} />
+              <Text style={s.heroEyebrow}>Most you can save</Text>
+              <BigSaving value={result.total_saving} />
               <Text style={s.heroSub}>
                 across {result.total_items} item{result.total_items === 1 ? '' : 's'} this shop
               </Text>
-            </View>
+            </LinearGradient>
 
-            <Text style={[s.eyebrow, { marginTop: 22, marginBottom: 10 }]}>Compare stores</Text>
+            <Text style={s.compareLabel}>Compare stores</Text>
 
             <View style={{ gap: 12 }}>
               {stops.map((stop, idx) => {
@@ -118,12 +139,14 @@ export default function StoreRecScreen() {
 
                 return (
                   <View key={stop.supermarket} style={[s.stopCard, best && s.stopCardBest]}>
+                    {/* BEST CHOICE ribbon — first child so overflow:hidden doesn't clip */}
                     {best && (
                       <View style={s.ribbon}>
-                        <Text style={s.ribbonText}>✦  MOST SAVINGS</Text>
+                        <Text style={s.ribbonText}>✦  BEST CHOICE</Text>
                       </View>
                     )}
 
+                    {/* Summary row (tappable toggle) */}
                     <TouchableOpacity
                       onPress={() => setOpenId(open ? null : stop.supermarket)}
                       style={s.summaryRow}
@@ -146,20 +169,21 @@ export default function StoreRecScreen() {
                       </View>
 
                       <View style={{ alignItems: 'flex-end' }}>
-                        <Text style={[s.savesEyebrow, { color: best ? Colors.green : Colors.ink3 }]}>You save</Text>
+                        <Text style={s.savesEyebrow}>You save</Text>
                         <Text style={s.savesAmount}>{fmt(stop.saving)}</Text>
                       </View>
 
                       <Text style={[s.chevron, open && { transform: [{ rotate: '180deg' }] }]}>⌄</Text>
                     </TouchableOpacity>
 
+                    {/* Expanded product list */}
                     {open && (
-                      <View style={[s.expanded, { borderTopColor: best ? Colors.greenSoft : Colors.line }]}>
+                      <View style={[s.expanded, { borderTopColor: best ? Colors.blueSoft : Colors.line }]}>
                         <View style={s.expandedHeader}>
                           <Text style={s.expandedLabel}>Products on offer here</Text>
                           <Text style={s.expandedSpend}>spend {fmt(stop.promo_total)}</Text>
                         </View>
-                        <View style={{ gap: 8 }}>
+                        <View style={{ gap: 10 }}>
                           {stop.items.map((item) => {
                             const pct = discountPct(item.promo_price, item.regular_price)
                             return (
@@ -194,6 +218,7 @@ export default function StoreRecScreen() {
             </View>
           </ScrollView>
 
+          {/* Dark bank CTA */}
           <View style={s.footer}>
             <TouchableOpacity style={s.bankBtn} onPress={handleBank} activeOpacity={0.85}>
               <Text style={s.bankBtnText}>✓  I shopped — bank {fmt(result.total_saving)}</Text>
@@ -206,57 +231,156 @@ export default function StoreRecScreen() {
 }
 
 const s = StyleSheet.create({
-  root: { flex: 1, backgroundColor: Colors.appBg },
-  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 22, paddingTop: 8, paddingBottom: 12 },
+  root: { flex: 1, backgroundColor: Colors.bg },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 18,
+    paddingTop: 8,
+    paddingBottom: 12,
+  },
   backBtn: { width: 60 },
-  backText: { fontSize: 16, color: Colors.ink2, fontFamily: 'HankenGrotesk_400Regular' },
-  headerTitle: { fontSize: 16, fontWeight: '700', color: Colors.ink, fontFamily: 'HankenGrotesk_700Bold' },
+  backText: { fontSize: 16, color: Colors.ink2, fontFamily: 'SchibstedGrotesk_400Regular' },
+  headerTitle: { fontSize: 17, fontWeight: '800', color: Colors.ink, fontFamily: 'SchibstedGrotesk_800ExtraBold' },
+
   centered: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 12 },
-  loadingText: { fontSize: 15, color: Colors.ink3, fontFamily: 'HankenGrotesk_400Regular' },
-  emptyText: { fontSize: 15, color: Colors.ink3, fontFamily: 'HankenGrotesk_400Regular' },
-  content: { paddingHorizontal: 22, paddingBottom: 24 },
-  eyebrow: { fontSize: 11.5, fontWeight: '700', letterSpacing: 1.5, textTransform: 'uppercase', color: Colors.ink3, fontFamily: 'HankenGrotesk_700Bold' },
+  loadingText: { fontSize: 15, color: Colors.ink3, fontFamily: 'SchibstedGrotesk_400Regular' },
+  emptyText: { fontSize: 15, color: Colors.ink3, fontFamily: 'SchibstedGrotesk_400Regular' },
 
-  heroCard: { backgroundColor: Colors.card, borderRadius: 22, padding: 22, alignItems: 'center', ...Shadows.card },
-  heroSub: { fontSize: 14, color: Colors.ink2, fontWeight: '600', marginTop: 8, fontFamily: 'HankenGrotesk_600SemiBold' },
+  content: { paddingHorizontal: 18, paddingBottom: 24 },
 
-  stopCard: { backgroundColor: Colors.card, borderRadius: 22, overflow: 'hidden', ...Shadows.card },
-  stopCardBest: { borderWidth: 2, borderColor: Colors.green, shadowColor: Colors.green, shadowOpacity: 0.3, shadowRadius: 20, elevation: 8 },
+  // Blue hero card
+  heroCard: {
+    borderRadius: 26,
+    padding: 22,
+    alignItems: 'center',
+    overflow: 'hidden',
+    ...Shadows.blue,
+  },
+  decCircle1: {
+    position: 'absolute',
+    width: 160,
+    height: 160,
+    borderRadius: 80,
+    backgroundColor: 'rgba(255,255,255,0.06)',
+    right: -40,
+    top: -40,
+  },
+  decCircle2: {
+    position: 'absolute',
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    left: -20,
+    bottom: -30,
+  },
+  heroEyebrow: {
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 1.2,
+    textTransform: 'uppercase',
+    color: 'rgba(255,255,255,0.7)',
+    fontFamily: 'SchibstedGrotesk_700Bold',
+    marginBottom: 10,
+  },
+  heroEuroSign: { fontSize: 22, fontWeight: '800', marginTop: 6, marginRight: 2, fontFamily: 'SchibstedGrotesk_800ExtraBold', fontVariant: ['tabular-nums'] as any },
+  heroAmount: { fontSize: 50, fontWeight: '800', lineHeight: 50, letterSpacing: -1, fontFamily: 'SchibstedGrotesk_800ExtraBold', fontVariant: ['tabular-nums'] as any },
+  heroCents: { fontSize: 22, fontWeight: '800', marginTop: 6, fontFamily: 'SchibstedGrotesk_800ExtraBold', fontVariant: ['tabular-nums'] as any },
+  heroSub: { fontSize: 14, color: 'rgba(255,255,255,0.8)', fontWeight: '500', marginTop: 10, fontFamily: 'SchibstedGrotesk_500Medium' },
 
-  ribbon: { backgroundColor: Colors.green, paddingHorizontal: 18, paddingVertical: 8, flexDirection: 'row', alignItems: 'center' },
-  ribbonText: { color: '#fff', fontSize: 11, fontWeight: '800', letterSpacing: 0.7, fontFamily: 'HankenGrotesk_700Bold' },
+  compareLabel: {
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 1.2,
+    textTransform: 'uppercase',
+    color: Colors.ink3,
+    fontFamily: 'SchibstedGrotesk_700Bold',
+    marginTop: 22,
+    marginBottom: 10,
+  },
 
-  summaryRow: { flexDirection: 'row', alignItems: 'center', gap: 13, padding: 15, paddingHorizontal: 16 },
+  // Store cards
+  stopCard: {
+    backgroundColor: Colors.surface,
+    borderRadius: 22,
+    overflow: 'hidden',
+    ...Shadows.card,
+  },
+  stopCardBest: {
+    borderWidth: 2,
+    borderColor: Colors.blue,
+    shadowColor: Colors.blue,
+    shadowOpacity: 0.25,
+    shadowRadius: 20,
+    elevation: 8,
+  },
+
+  ribbon: {
+    backgroundColor: Colors.blue,
+    paddingHorizontal: 18,
+    paddingVertical: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  ribbonText: { color: '#fff', fontSize: 11, fontWeight: '800', letterSpacing: 0.7, fontFamily: 'SchibstedGrotesk_800ExtraBold' },
+
+  summaryRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 13,
+    padding: 16,
+  },
 
   monogram: { width: 44, height: 44, borderRadius: 13, alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
-  monogramText: { color: '#fff', fontWeight: '700', fontSize: 18, fontFamily: 'HankenGrotesk_700Bold' },
+  monogramText: { color: '#fff', fontWeight: '700', fontSize: 18, fontFamily: 'SchibstedGrotesk_700Bold' },
 
-  storeName: { fontSize: 18, fontWeight: '700', letterSpacing: -0.3, color: Colors.ink, fontFamily: 'HankenGrotesk_700Bold' },
+  storeName: { fontSize: 18, fontWeight: '700', letterSpacing: -0.3, color: Colors.ink, fontFamily: 'SchibstedGrotesk_700Bold' },
   rankPill: { backgroundColor: Colors.line, paddingHorizontal: 8, paddingVertical: 2, borderRadius: 999 },
-  rankText: { fontSize: 11, fontWeight: '700', color: Colors.ink3, fontFamily: 'HankenGrotesk_700Bold' },
-  itemsOnOffer: { fontSize: 13, color: Colors.ink3, fontWeight: '600', marginTop: 3, fontFamily: 'HankenGrotesk_600SemiBold' },
+  rankText: { fontSize: 11, fontWeight: '700', color: Colors.ink3, fontFamily: 'SchibstedGrotesk_700Bold' },
+  itemsOnOffer: { fontSize: 13, color: Colors.ink3, marginTop: 3, fontFamily: 'SchibstedGrotesk_400Regular' },
 
-  savesEyebrow: { fontSize: 9.5, fontWeight: '700', letterSpacing: 0.5, textTransform: 'uppercase', fontFamily: 'HankenGrotesk_700Bold' },
-  savesAmount: { fontSize: 24, fontWeight: '600', color: Colors.green, fontFamily: 'SpaceGrotesk_600SemiBold', letterSpacing: -0.5, lineHeight: 28 },
+  savesEyebrow: { fontSize: 10, fontWeight: '700', letterSpacing: 0.5, textTransform: 'uppercase', color: Colors.green, fontFamily: 'SchibstedGrotesk_700Bold' },
+  savesAmount: { fontSize: 20, fontWeight: '800', color: Colors.green, fontFamily: 'SchibstedGrotesk_800ExtraBold', letterSpacing: -0.5, fontVariant: ['tabular-nums'] as any, lineHeight: 26 },
 
   chevron: { fontSize: 22, color: Colors.ink3, flexShrink: 0, marginBottom: 4 },
 
   expanded: { borderTopWidth: 1, padding: 16, paddingTop: 0 },
-  expandedHeader: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 12, paddingHorizontal: 2 },
-  expandedLabel: { fontSize: 12.5, color: Colors.ink3, fontWeight: '600', fontFamily: 'HankenGrotesk_600SemiBold' },
-  expandedSpend: { fontSize: 12.5, color: Colors.ink3, fontWeight: '600', fontFamily: 'HankenGrotesk_600SemiBold' },
+  expandedHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingVertical: 12,
+    paddingHorizontal: 2,
+  },
+  expandedLabel: { fontSize: 12.5, color: Colors.ink3, fontWeight: '600', fontFamily: 'SchibstedGrotesk_700Bold' },
+  expandedSpend: { fontSize: 12.5, color: Colors.ink3, fontWeight: '600', fontFamily: 'SchibstedGrotesk_700Bold' },
 
   productRow: { flexDirection: 'row', alignItems: 'center', gap: 11 },
-  productTile: { width: 34, height: 34, borderRadius: 10, backgroundColor: Colors.greenTint, alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
-  productLetter: { fontSize: 14, fontWeight: '700', color: Colors.green, fontFamily: 'HankenGrotesk_700Bold' },
-  productName: { fontSize: 14.5, fontWeight: '600', color: Colors.ink, fontFamily: 'HankenGrotesk_600SemiBold' },
-  productUnit: { fontSize: 12, color: Colors.ink3, marginTop: 1, fontFamily: 'HankenGrotesk_400Regular' },
+  productTile: {
+    width: 34,
+    height: 34,
+    borderRadius: 10,
+    backgroundColor: Colors.inset,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+  },
+  productLetter: { fontSize: 14, fontWeight: '700', color: Colors.ink2, fontFamily: 'SchibstedGrotesk_700Bold' },
+  productName: { fontSize: 14.5, fontWeight: '600', color: Colors.ink, fontFamily: 'SchibstedGrotesk_700Bold' },
+  productUnit: { fontSize: 12, color: Colors.ink3, marginTop: 1, fontFamily: 'SchibstedGrotesk_400Regular' },
   discountBadge: { backgroundColor: Colors.greenSoft, paddingHorizontal: 8, paddingVertical: 3, borderRadius: 999, flexShrink: 0 },
-  discountText: { fontSize: 11, fontWeight: '700', color: Colors.green, fontFamily: 'HankenGrotesk_700Bold' },
-  productPromo: { fontSize: 14.5, fontWeight: '700', color: Colors.ink, fontFamily: 'HankenGrotesk_700Bold' },
-  productRegular: { fontSize: 11.5, color: Colors.ink3, textDecorationLine: 'line-through', fontFamily: 'HankenGrotesk_400Regular' },
+  discountText: { fontSize: 11, fontWeight: '700', color: Colors.green, fontFamily: 'SchibstedGrotesk_700Bold' },
+  productPromo: { fontSize: 14.5, fontWeight: '700', color: Colors.ink, fontFamily: 'SchibstedGrotesk_800ExtraBold', fontVariant: ['tabular-nums'] as any },
+  productRegular: { fontSize: 11.5, color: Colors.ink3, textDecorationLine: 'line-through', fontFamily: 'SchibstedGrotesk_400Regular' },
 
-  footer: { paddingHorizontal: 22, paddingBottom: 36, paddingTop: 10 },
-  bankBtn: { height: 54, borderRadius: 16, backgroundColor: Colors.green, alignItems: 'center', justifyContent: 'center', ...Shadows.green },
-  bankBtnText: { fontSize: 16, fontWeight: '600', color: '#fff', fontFamily: 'HankenGrotesk_600SemiBold' },
+  footer: { paddingHorizontal: 18, paddingBottom: 36, paddingTop: 10 },
+  bankBtn: {
+    height: 54,
+    borderRadius: 15,
+    backgroundColor: Colors.ink,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  bankBtnText: { fontSize: 16, fontWeight: '700', color: '#fff', fontFamily: 'SchibstedGrotesk_700Bold' },
 })

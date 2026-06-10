@@ -12,9 +12,9 @@ export function MoneyHero({ value, size = 76, color = Colors.green }: Props) {
 
   return (
     <View style={{ flexDirection: 'row', alignItems: 'flex-start' }}>
-      <Text style={{ fontSize: size * 0.42, marginTop: size * 0.1, marginRight: 2, color, fontFamily: 'SpaceGrotesk_600SemiBold', fontVariant: ['tabular-nums'] }}>€</Text>
-      <Text style={{ fontSize: size, color, fontFamily: 'SpaceGrotesk_600SemiBold', letterSpacing: -2, lineHeight: size * 0.96, fontVariant: ['tabular-nums'] }}>{int}</Text>
-      <Text style={{ fontSize: size * 0.42, marginTop: size * 0.1, color, fontFamily: 'SpaceGrotesk_600SemiBold', fontVariant: ['tabular-nums'] }}>,{dec}</Text>
+      <Text style={{ fontSize: size * 0.42, marginTop: size * 0.1, marginRight: 2, color, fontFamily: 'SchibstedGrotesk_800ExtraBold', fontVariant: ['tabular-nums'] }}>€</Text>
+      <Text style={{ fontSize: size, color, fontFamily: 'SchibstedGrotesk_800ExtraBold', letterSpacing: -2, lineHeight: size * 0.96, fontVariant: ['tabular-nums'] }}>{int}</Text>
+      <Text style={{ fontSize: size * 0.42, marginTop: size * 0.1, color, fontFamily: 'SchibstedGrotesk_800ExtraBold', fontVariant: ['tabular-nums'] }}>,{dec}</Text>
     </View>
   )
 }

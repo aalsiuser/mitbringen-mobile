@@ -2,15 +2,12 @@ import { useEffect } from 'react'
 import { Stack } from 'expo-router'
 import * as SplashScreen from 'expo-splash-screen'
 import {
-  useFonts,
-  HankenGrotesk_400Regular,
-  HankenGrotesk_500Medium,
-  HankenGrotesk_600SemiBold,
-  HankenGrotesk_700Bold,
-} from '@expo-google-fonts/hanken-grotesk'
-import {
-  SpaceGrotesk_600SemiBold,
-} from '@expo-google-fonts/space-grotesk'
+  SchibstedGrotesk_400Regular,
+  SchibstedGrotesk_500Medium,
+  SchibstedGrotesk_700Bold,
+  SchibstedGrotesk_800ExtraBold,
+} from '@expo-google-fonts/schibsted-grotesk'
+import { useFonts } from 'expo-font'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { AppProvider } from '@/lib/AppContext'
 import '../global.css'
@@ -21,11 +18,10 @@ const queryClient = new QueryClient()
 
 export default function RootLayout() {
   const [loaded, error] = useFonts({
-    HankenGrotesk_400Regular,
-    HankenGrotesk_500Medium,
-    HankenGrotesk_600SemiBold,
-    HankenGrotesk_700Bold,
-    SpaceGrotesk_600SemiBold,
+    SchibstedGrotesk_400Regular,
+    SchibstedGrotesk_500Medium,
+    SchibstedGrotesk_700Bold,
+    SchibstedGrotesk_800ExtraBold,
   })
 
   useEffect(() => { if (error) throw error }, [error])

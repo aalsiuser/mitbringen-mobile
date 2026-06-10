@@ -131,7 +131,7 @@ export function AuthScreen() {
         )}
         <Text style={s.toggle}>
           {isSignup ? 'Already have an account? ' : 'New to mitbringen? '}
-          <Text style={{ color: Colors.green, fontWeight: '700' }} onPress={switchMode}>
+          <Text style={{ color: Colors.blue, fontWeight: '700' }} onPress={switchMode}>
             {isSignup ? 'Log in' : 'Create account'}
           </Text>
         </Text>
@@ -141,29 +141,29 @@ export function AuthScreen() {
 }
 
 const s = StyleSheet.create({
-  root: { flex: 1, backgroundColor: Colors.appBg },
+  root: { flex: 1, backgroundColor: Colors.bg },
   scroll: { flex: 1 },
   content: { paddingHorizontal: 22, paddingTop: 60, paddingBottom: 20 },
   wordmark: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   dot: { width: 9, height: 9, borderRadius: 999, backgroundColor: Colors.green },
-  wordmarkText: { fontSize: 17, fontWeight: '700', letterSpacing: -0.5, color: Colors.ink, fontFamily: 'HankenGrotesk_700Bold' },
-  headline: { fontSize: 31, fontWeight: '700', letterSpacing: -0.8, lineHeight: 36, color: Colors.ink, fontFamily: 'HankenGrotesk_700Bold' },
-  sub: { fontSize: 15.5, color: Colors.ink2, lineHeight: 23, marginTop: 10, maxWidth: 300, fontFamily: 'HankenGrotesk_400Regular' },
+  wordmarkText: { fontSize: 17, fontWeight: '700', letterSpacing: -0.5, color: Colors.ink, fontFamily: 'SchibstedGrotesk_700Bold' },
+  headline: { fontSize: 31, fontWeight: '700', letterSpacing: -0.8, lineHeight: 36, color: Colors.ink, fontFamily: 'SchibstedGrotesk_700Bold' },
+  sub: { fontSize: 15.5, color: Colors.ink2, lineHeight: 23, marginTop: 10, maxWidth: 300, fontFamily: 'SchibstedGrotesk_400Regular' },
   divider: { flexDirection: 'row', alignItems: 'center', gap: 14, marginTop: 28, marginBottom: 18 },
   dividerLine: { flex: 1, height: 1, backgroundColor: Colors.line },
-  dividerLabel: { fontSize: 12.5, color: Colors.ink3, fontWeight: '600', fontFamily: 'HankenGrotesk_600SemiBold' },
+  dividerLabel: { fontSize: 12.5, color: Colors.ink3, fontWeight: '600', fontFamily: 'SchibstedGrotesk_700Bold' },
   btn: { height: 54, borderRadius: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingHorizontal: 22 },
-  btnGreen: { backgroundColor: Colors.green, shadowColor: Colors.green, shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.4, shadowRadius: 12, elevation: 6 },
-  btnText: { fontSize: 16, fontWeight: '600', fontFamily: 'HankenGrotesk_600SemiBold' },
-  input: { height: 54, borderRadius: 14, borderWidth: 1.5, borderColor: Colors.line2, backgroundColor: '#fff', paddingHorizontal: 16, fontSize: 16, color: Colors.ink, fontFamily: 'HankenGrotesk_400Regular' },
+  btnGreen: { backgroundColor: Colors.blue, shadowColor: Colors.blue, shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.4, shadowRadius: 12, elevation: 6 },
+  btnText: { fontSize: 16, fontWeight: '600', fontFamily: 'SchibstedGrotesk_700Bold' },
+  input: { height: 54, borderRadius: 14, borderWidth: 1.5, borderColor: Colors.line2, backgroundColor: '#fff', paddingHorizontal: 16, fontSize: 16, color: Colors.ink, fontFamily: 'SchibstedGrotesk_400Regular' },
   inputError: { borderColor: Colors.danger },
   pwWrap: { position: 'relative' },
   pwInput: { paddingRight: 52 },
   eyeBtn: { position: 'absolute', right: 12, top: 0, bottom: 0, alignItems: 'center', justifyContent: 'center', width: 38 },
   eyeIcon: { fontSize: 18 },
-  forgotPw: { fontSize: 13, fontWeight: '600', color: Colors.green, fontFamily: 'HankenGrotesk_600SemiBold' },
-  error: { fontSize: 12.5, color: Colors.danger, fontWeight: '600', fontFamily: 'HankenGrotesk_600SemiBold' },
+  forgotPw: { fontSize: 13, fontWeight: '600', color: Colors.blue, fontFamily: 'SchibstedGrotesk_700Bold' },
+  error: { fontSize: 12.5, color: Colors.danger, fontWeight: '600', fontFamily: 'SchibstedGrotesk_700Bold' },
   footer: { paddingHorizontal: 22, paddingBottom: 36, paddingTop: 10, gap: 8 },
-  legal: { fontSize: 11.5, color: Colors.ink3, textAlign: 'center', lineHeight: 17, fontFamily: 'HankenGrotesk_400Regular' },
-  toggle: { fontSize: 14, color: Colors.ink2, textAlign: 'center', marginTop: 4, fontFamily: 'HankenGrotesk_400Regular' },
+  legal: { fontSize: 11.5, color: Colors.ink3, textAlign: 'center', lineHeight: 17, fontFamily: 'SchibstedGrotesk_400Regular' },
+  toggle: { fontSize: 14, color: Colors.ink2, textAlign: 'center', marginTop: 4, fontFamily: 'SchibstedGrotesk_400Regular' },
 })

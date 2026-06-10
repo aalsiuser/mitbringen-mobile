@@ -1,135 +1,385 @@
 import { ScrollView, View, Text, TouchableOpacity, StyleSheet } from 'react-native'
+import { LinearGradient } from 'expo-linear-gradient'
 import { useRouter } from 'expo-router'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { Colors } from '@/constants/colors'
-import { MoneyHero } from '@/components/ui/MoneyHero'
-import { ProgressBar } from '@/components/ui/ProgressBar'
+import { Colors, Shadows } from '@/constants/colors'
 import { useApp } from '@/lib/AppContext'
+import { useTween } from '@/hooks/useTween'
 import { fmt } from '@/lib/data'
 
 const MONTH = new Date().toLocaleString('de-AT', { month: 'long' })
 
+// Group items by their cheapest store and pick top 3 by count
+function topStores(items: ReturnType<typeof useApp>['items']) {
+  const byStore: Record<string, { name: string; color: string; count: number; saving: number }> = {}
+  for (const item of items) {
+    const bp = item.best_price
+    if (!bp) continue
+    const slug = bp.supermarket
+    if (!byStore[slug]) {
+      byStore[slug] = {
+        name: bp.supermarket_name,
+        color: Colors.store[slug as keyof typeof Colors.store] ?? Colors.ink3,
+        count: 0,
+        saving: 0,
+      }
+    }
+    byStore[slug].count++
+    byStore[slug].saving += Math.max(0, (bp.regular_price ?? 0) - (bp.promo_price ?? 0))
+  }
+  return Object.entries(byStore)
+    .sort((a, b) => b[1].saving - a[1].saving)
+    .slice(0, 3)
+}
+
+function BigEuro({ value, color = '#fff' }: { value: number; color?: string }) {
+  const v = useTween(value)
+  const safe = Math.max(0, v)
+  const int = Math.floor(safe)
+  const dec = Math.round((safe - int) * 100).toString().padStart(2, '0')
+  return (
+    <View style={{ flexDirection: 'row', alignItems: 'flex-start' }}>
+      <Text style={[s.heroEuroSign, { color }]}>€</Text>
+      <Text style={[s.heroAmount, { color }]}>{int}</Text>
+      <Text style={[s.heroCents, { color }]}>,{dec}</Text>
+    </View>
+  )
+}
+
 export default function HomeTab() {
-  const { saved, goal, items, listName, shops, justBanked, setAssistantOpen, signOut } = useApp()
+  const { saved, goal, items, listName, justBanked, user, signOut } = useApp()
   const router = useRouter()
-  const pct = goal > 0 ? (saved / goal) * 100 : 0
+  const pct = goal > 0 ? Math.min(100, (saved / goal) * 100) : 0
   const remaining = Math.max(0, goal - saved)
+
   const predicted = items.reduce((s, item) => {
     const bp = item.best_price
     return s + Math.max(0, (bp?.regular_price ?? 0) - (bp?.promo_price ?? 0))
   }, 0)
 
+  const stores = topStores(items)
+  const initial = (user?.email?.[0] ?? 'A').toUpperCase()
+
   return (
     <SafeAreaView style={s.root} edges={['top']}>
-      <View style={s.appbar}>
+      {/* Top bar */}
+      <View style={s.topBar}>
         <View>
-          <View style={s.wordmark}><View style={s.dot} /><Text style={s.wordmarkText}>mitbringen</Text></View>
-          <Text style={s.subtitle}>Servus 👋</Text>
+          <Text style={s.greeting}>Guten Morgen,</Text>
+          <Text style={s.greetingName}>{user?.email?.split('@')[0] ?? 'Anna'}</Text>
         </View>
-        <TouchableOpacity onPress={signOut} style={s.logoutBtn}>
-          <Text style={s.logoutText}>Log out</Text>
+        <TouchableOpacity onPress={signOut} style={s.avatar}>
+          <Text style={s.avatarText}>{initial}</Text>
         </TouchableOpacity>
       </View>
 
+      {/* Bank toast */}
+      {justBanked > 0 && (
+        <View style={s.toast} pointerEvents="none">
+          <Text style={s.toastText}>🎉 Banked {fmt(justBanked)} into your savings</Text>
+        </View>
+      )}
+
       <ScrollView style={s.scroll} contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
-        {/* Savings hero */}
-        <View style={s.hero}>
-          <Text style={s.eyebrow}>Saved in {MONTH}</Text>
-          <View style={{ alignItems: 'center', marginTop: 14, position: 'relative' }}>
-            <MoneyHero value={saved} size={84} />
-            {justBanked > 0 && (
-              <View style={s.justBankedPill}>
-                <Text style={s.justBankedText}>+{fmt(justBanked)}</Text>
+        {/* Blue savings hero card */}
+        <LinearGradient
+          colors={['#2f6bff', '#1d4fe6', '#1a44c8']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={s.heroCard}
+        >
+          {/* Decorative circles */}
+          <View style={s.decCircle1} />
+          <View style={s.decCircle2} />
+
+          <View style={s.heroTop}>
+            <Text style={s.heroEyebrow}>Saved in {MONTH}</Text>
+            {saved > 0 && (
+              <View style={s.weekChip}>
+                <Text style={s.weekChipText}>↑ {fmt(predicted > 0 ? predicted : 0)} this week</Text>
               </View>
             )}
           </View>
 
-          {goal > 0 ? (
-            <View style={{ marginTop: 22, paddingHorizontal: 4 }}>
-              <ProgressBar pct={pct} height={14} />
-              <View style={s.progressLabels}>
-                <Text style={[s.progressLabel, { color: Colors.green }]}>{Math.round(pct)}% of {fmt(goal)}</Text>
-                <Text style={[s.progressLabel, { color: Colors.ink3 }]}>{fmt(remaining)} to goal</Text>
+          <BigEuro value={saved} />
+
+          {goal > 0 && (
+            <View style={s.heroProgress}>
+              <View style={s.progressTrack}>
+                <View style={[s.progressFill, { width: `${pct}%` }]} />
+              </View>
+              <View style={s.progressMeta}>
+                <Text style={s.progressLeft}>{Math.round(pct)}% of {fmt(goal)} goal</Text>
+                <Text style={s.progressRight}>{fmt(remaining)} to go</Text>
               </View>
             </View>
-          ) : (
-            <TouchableOpacity style={s.setGoalBtn}>
-              <Text style={s.setGoalText}>⊙ Set a monthly goal</Text>
-            </TouchableOpacity>
           )}
-        </View>
+        </LinearGradient>
 
-        {/* Stat strip */}
-        <View style={s.statStrip}>
-          <View style={[s.statCard, { flex: 1 }]}>
-            <Text style={s.statEyebrow}>Shops</Text>
-            <Text style={s.statNum}>{shops}</Text>
-            <Text style={s.statSub}>this month</Text>
-          </View>
-          <TouchableOpacity style={[s.statCard, s.assistantCard, { flex: 1 }]} onPress={() => setAssistantOpen(true)} activeOpacity={0.85}>
-            <View style={s.soonPill}><Text style={s.soonText}>SOON</Text></View>
-            <View style={s.assistantIcon}><Text style={{ fontSize: 19 }}>💬</Text></View>
-            <Text style={s.assistantTitle}>Assistant</Text>
-            <Text style={s.assistantSub}>Ask anything{'\n'}in Vienna</Text>
+        {/* Quick actions */}
+        <View style={s.quickGrid}>
+          <TouchableOpacity style={s.quickTile} onPress={() => router.push('/(tabs)/list')} activeOpacity={0.8}>
+            <View style={[s.quickIcon, { backgroundColor: Colors.blueSoft }]}>
+              <Text style={{ fontSize: 18 }}>＋</Text>
+            </View>
+            <Text style={s.quickLabel}>New list</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={s.quickTile} activeOpacity={0.8}>
+            <View style={[s.quickIcon, { backgroundColor: Colors.coralSoft }]}>
+              <Text style={{ fontSize: 18 }}>🧾</Text>
+            </View>
+            <Text style={s.quickLabel}>Scan bill</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={s.quickTile} activeOpacity={0.8}>
+            <View style={[s.quickIcon, { backgroundColor: Colors.greenSoft }]}>
+              <Text style={{ fontSize: 18 }}>%</Text>
+            </View>
+            <Text style={s.quickLabel}>Deals</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={s.quickTile} activeOpacity={0.8}>
+            <View style={[s.quickIcon, { backgroundColor: Colors.violetSoft }]}>
+              <Text style={{ fontSize: 18 }}>◎</Text>
+            </View>
+            <Text style={s.quickLabel}>Goal</Text>
           </TouchableOpacity>
         </View>
 
-        {/* Current list card */}
-        <TouchableOpacity style={s.listCard} onPress={() => router.push('/(tabs)/list')} activeOpacity={0.85}>
-          <View style={s.listCardHeader}>
-            <Text style={s.eyebrow}>Current list</Text>
-            <Text style={{ color: Colors.green, fontSize: 18 }}>→</Text>
+        {/* Your list section */}
+        <View style={s.sectionHeader}>
+          <Text style={s.sectionTitle}>Your list</Text>
+          <TouchableOpacity onPress={() => router.push('/(tabs)/list')}>
+            <Text style={s.sectionLink}>Open</Text>
+          </TouchableOpacity>
+        </View>
+
+        <View style={s.listCard}>
+          <View style={s.listCardTop}>
+            <View style={{ flex: 1 }}>
+              <Text style={s.listName}>{listName}</Text>
+              <Text style={s.listMeta}>{items.length} item{items.length === 1 ? '' : 's'}{items.length > 0 ? ' · ready to shop' : ''}</Text>
+            </View>
+            <TouchableOpacity style={s.listBtn} onPress={() => router.push('/(tabs)/list')} activeOpacity={0.8}>
+              <Text style={{ color: '#fff', fontSize: 18 }}>↻</Text>
+            </TouchableOpacity>
           </View>
-          <Text style={s.listName}>{listName}</Text>
-          <View style={s.listMeta}>
-            <Text style={s.listItemCount}>{items.length} item{items.length === 1 ? '' : 's'}</Text>
-            {predicted > 0 && (
-              <View style={s.savesPill}><Text style={s.savesText}>saves {fmt(predicted)}</Text></View>
-            )}
-          </View>
-          {items.length === 0 && <Text style={s.emptyHint}>Empty — tap to add items</Text>}
-        </TouchableOpacity>
+
+          {items.length > 0 && (
+            <View style={s.emojiRow}>
+              {items.slice(0, 5).map((item) => (
+                <View key={item.id} style={s.emojiBubble}>
+                  <Text style={{ fontSize: 16 }}>{item.name[0].toUpperCase()}</Text>
+                </View>
+              ))}
+              {items.length > 5 && (
+                <View style={[s.emojiBubble, s.overflowBubble]}>
+                  <Text style={s.overflowText}>+{items.length - 5}</Text>
+                </View>
+              )}
+              {predicted > 0 && (
+                <View style={s.savesPill}>
+                  <Text style={s.savesText}>saves {fmt(predicted)}</Text>
+                </View>
+              )}
+            </View>
+          )}
+
+          {items.length === 0 && (
+            <Text style={s.emptyHint}>Empty — tap Open to add items</Text>
+          )}
+        </View>
+
+        {/* Where to save this week */}
+        {stores.length > 0 && (
+          <>
+            <View style={s.sectionHeader}>
+              <Text style={s.sectionTitle}>Where to save this week</Text>
+            </View>
+            <View style={s.storesCard}>
+              {stores.map(([slug, store], idx) => (
+                <TouchableOpacity
+                  key={slug}
+                  style={[s.storeRow, idx < stores.length - 1 && s.storeRowBorder]}
+                  onPress={() => router.push('/store-rec')}
+                  activeOpacity={0.7}
+                >
+                  <View style={[s.storeMonogram, { backgroundColor: store.color }]}>
+                    <Text style={s.storeMonogramText}>{store.name[0]}</Text>
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={s.storeName}>{store.name}</Text>
+                    <Text style={s.storeItemCount}>{store.count} of your items on offer</Text>
+                  </View>
+                  <Text style={s.storeSaving}>{fmt(store.saving)}</Text>
+                  <Text style={s.storeChev}>›</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </>
+        )}
       </ScrollView>
     </SafeAreaView>
   )
 }
 
 const s = StyleSheet.create({
-  root: { flex: 1, backgroundColor: Colors.appBg },
-  appbar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 22, paddingTop: 8, paddingBottom: 12, },
-  logoutBtn: { paddingVertical: 6, paddingHorizontal: 12, borderRadius: 999, backgroundColor: Colors.line },
-  logoutText: { fontSize: 13, color: Colors.ink2, fontWeight: '600', fontFamily: 'HankenGrotesk_600SemiBold' },
-  wordmark: { flexDirection: 'row', alignItems: 'center', gap: 7 },
-  dot: { width: 9, height: 9, borderRadius: 999, backgroundColor: Colors.green },
-  wordmarkText: { fontSize: 17, fontWeight: '700', letterSpacing: -0.5, color: Colors.ink, fontFamily: 'HankenGrotesk_700Bold' },
-  subtitle: { fontSize: 12.5, color: Colors.ink3, marginTop: 2, marginLeft: 16, fontFamily: 'HankenGrotesk_400Regular' },
+  root: { flex: 1, backgroundColor: Colors.bg },
+
+  // Top bar
+  topBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 22,
+    paddingTop: 8,
+    paddingBottom: 14,
+  },
+  greeting: { fontSize: 14, color: Colors.ink3, fontFamily: 'SchibstedGrotesk_400Regular' },
+  greetingName: { fontSize: 22, fontWeight: '800', color: Colors.ink, fontFamily: 'SchibstedGrotesk_800ExtraBold', marginTop: 1 },
+  avatar: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: Colors.blue,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  avatarText: { color: '#fff', fontSize: 16, fontWeight: '700', fontFamily: 'SchibstedGrotesk_700Bold' },
+
+  // Toast
+  toast: {
+    position: 'absolute',
+    top: 90,
+    alignSelf: 'center',
+    backgroundColor: Colors.green,
+    paddingHorizontal: 18,
+    paddingVertical: 10,
+    borderRadius: 999,
+    zIndex: 100,
+    ...Shadows.green,
+  },
+  toastText: { color: '#fff', fontSize: 14, fontWeight: '700', fontFamily: 'SchibstedGrotesk_700Bold' },
+
   scroll: { flex: 1 },
-  content: { paddingHorizontal: 22, paddingBottom: 24 },
-  hero: { alignItems: 'center', paddingTop: 20, paddingBottom: 8 },
-  eyebrow: { fontSize: 11.5, fontWeight: '700', letterSpacing: 1.5, textTransform: 'uppercase', color: Colors.ink3, fontFamily: 'HankenGrotesk_700Bold' },
-  justBankedPill: { position: 'absolute', top: -14, right: -54, backgroundColor: Colors.green, paddingHorizontal: 11, paddingVertical: 5, borderRadius: 999, shadowColor: Colors.green, shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.5, shadowRadius: 10, elevation: 6 },
-  justBankedText: { color: '#fff', fontSize: 13, fontWeight: '700', fontFamily: 'HankenGrotesk_700Bold' },
-  progressLabels: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 10 },
-  progressLabel: { fontSize: 13.5, fontWeight: '600', fontFamily: 'HankenGrotesk_600SemiBold' },
-  setGoalBtn: { marginTop: 22, height: 46, paddingHorizontal: 18, borderRadius: 999, backgroundColor: '#fff', alignItems: 'center', justifyContent: 'center', shadowColor: '#23231f', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 6, elevation: 2 },
-  setGoalText: { fontSize: 14, color: Colors.ink, fontFamily: 'HankenGrotesk_400Regular' },
-  statStrip: { flexDirection: 'row', gap: 12, marginTop: 22 },
-  statCard: { backgroundColor: Colors.card, borderRadius: 22, padding: 16, shadowColor: '#23231f', shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.07, shadowRadius: 8, elevation: 3 },
-  statEyebrow: { fontSize: 10.5, fontWeight: '700', letterSpacing: 1.2, textTransform: 'uppercase', color: Colors.ink3, fontFamily: 'HankenGrotesk_700Bold' },
-  statNum: { fontSize: 28, fontWeight: '600', marginTop: 6, color: Colors.ink, fontFamily: 'SpaceGrotesk_600SemiBold' },
-  statSub: { fontSize: 12.5, color: Colors.ink3, marginTop: 2, fontFamily: 'HankenGrotesk_400Regular' },
-  assistantCard: { overflow: 'hidden', backgroundColor: Colors.greenTint },
-  soonPill: { position: 'absolute', top: 13, right: 13, backgroundColor: Colors.amberSoft, paddingHorizontal: 8, paddingVertical: 3, borderRadius: 999 },
-  soonText: { fontSize: 10, fontWeight: '800', letterSpacing: 0.6, color: Colors.amber, fontFamily: 'HankenGrotesk_700Bold' },
-  assistantIcon: { width: 34, height: 34, borderRadius: 11, backgroundColor: Colors.greenSoft, alignItems: 'center', justifyContent: 'center' },
-  assistantTitle: { fontSize: 16, fontWeight: '700', marginTop: 11, color: Colors.ink, fontFamily: 'HankenGrotesk_700Bold' },
-  assistantSub: { fontSize: 12.5, color: Colors.ink3, marginTop: 2, fontFamily: 'HankenGrotesk_400Regular' },
-  listCard: { marginTop: 14, backgroundColor: Colors.card, borderRadius: 22, padding: 18, shadowColor: '#23231f', shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.07, shadowRadius: 8, elevation: 3 },
-  listCardHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  listName: { fontSize: 21, fontWeight: '700', letterSpacing: -0.4, marginTop: 8, color: Colors.ink, fontFamily: 'HankenGrotesk_700Bold' },
-  listMeta: { flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 12 },
-  listItemCount: { fontSize: 14, fontWeight: '600', color: Colors.ink2, fontFamily: 'HankenGrotesk_600SemiBold' },
-  savesPill: { backgroundColor: Colors.greenSoft, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 999 },
-  savesText: { fontSize: 13, fontWeight: '700', color: Colors.green, fontFamily: 'HankenGrotesk_700Bold' },
-  emptyHint: { fontSize: 13.5, color: Colors.ink3, marginTop: 8, fontFamily: 'HankenGrotesk_400Regular' },
+  content: { paddingHorizontal: 18, paddingBottom: 32 },
+
+  // Blue hero card
+  heroCard: {
+    borderRadius: 26,
+    padding: 22,
+    overflow: 'hidden',
+    ...Shadows.blue,
+  },
+  decCircle1: {
+    position: 'absolute',
+    width: 180,
+    height: 180,
+    borderRadius: 90,
+    backgroundColor: 'rgba(255,255,255,0.06)',
+    right: -50,
+    top: -50,
+  },
+  decCircle2: {
+    position: 'absolute',
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    right: 30,
+    bottom: -40,
+  },
+  heroTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 },
+  heroEyebrow: { fontSize: 11, fontWeight: '700', letterSpacing: 1.2, textTransform: 'uppercase', color: 'rgba(255,255,255,0.7)', fontFamily: 'SchibstedGrotesk_700Bold' },
+  weekChip: { backgroundColor: 'rgba(255,255,255,0.18)', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 999 },
+  weekChipText: { color: '#fff', fontSize: 11, fontWeight: '600', fontFamily: 'SchibstedGrotesk_700Bold' },
+
+  heroEuroSign: { fontSize: 24, fontWeight: '800', marginTop: 8, marginRight: 2, fontFamily: 'SchibstedGrotesk_800ExtraBold', fontVariant: ['tabular-nums'] as any },
+  heroAmount: { fontSize: 54, fontWeight: '800', lineHeight: 54, letterSpacing: -1, fontFamily: 'SchibstedGrotesk_800ExtraBold', fontVariant: ['tabular-nums'] as any },
+  heroCents: { fontSize: 24, fontWeight: '800', marginTop: 8, fontFamily: 'SchibstedGrotesk_800ExtraBold', fontVariant: ['tabular-nums'] as any },
+
+  heroProgress: { marginTop: 18 },
+  progressTrack: { height: 8, borderRadius: 999, backgroundColor: 'rgba(255,255,255,0.25)', overflow: 'hidden' },
+  progressFill: { height: 8, borderRadius: 999, backgroundColor: '#fff' },
+  progressMeta: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 8 },
+  progressLeft: { fontSize: 12, color: '#fff', fontFamily: 'SchibstedGrotesk_400Regular' },
+  progressRight: { fontSize: 12, color: 'rgba(255,255,255,0.65)', fontFamily: 'SchibstedGrotesk_400Regular' },
+
+  // Quick actions
+  quickGrid: {
+    flexDirection: 'row',
+    gap: 10,
+    marginTop: 18,
+  },
+  quickTile: {
+    flex: 1,
+    backgroundColor: Colors.surface,
+    borderRadius: 18,
+    padding: 12,
+    alignItems: 'center',
+    gap: 8,
+    ...Shadows.card,
+  },
+  quickIcon: { width: 38, height: 38, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
+  quickLabel: { fontSize: 11, fontWeight: '600', color: Colors.ink2, textAlign: 'center', fontFamily: 'SchibstedGrotesk_700Bold' },
+
+  // Section header
+  sectionHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 22, marginBottom: 10 },
+  sectionTitle: { fontSize: 16, fontWeight: '700', color: Colors.ink, fontFamily: 'SchibstedGrotesk_700Bold' },
+  sectionLink: { fontSize: 14, fontWeight: '600', color: Colors.blue, fontFamily: 'SchibstedGrotesk_700Bold' },
+
+  // List card
+  listCard: {
+    backgroundColor: Colors.surface,
+    borderRadius: 22,
+    padding: 16,
+    ...Shadows.card,
+  },
+  listCardTop: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  listName: { fontSize: 19, fontWeight: '800', letterSpacing: -0.3, color: Colors.ink, fontFamily: 'SchibstedGrotesk_800ExtraBold' },
+  listMeta: { fontSize: 13, color: Colors.ink3, marginTop: 2, fontFamily: 'SchibstedGrotesk_400Regular' },
+  listBtn: { width: 40, height: 40, borderRadius: 20, backgroundColor: Colors.blue, alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
+  emojiRow: { flexDirection: 'row', alignItems: 'center', marginTop: 12, gap: 4 },
+  emojiBubble: {
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    backgroundColor: Colors.inset,
+    borderWidth: 2,
+    borderColor: Colors.surface,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginLeft: -6,
+  },
+  overflowBubble: { backgroundColor: Colors.line2 },
+  overflowText: { fontSize: 11, fontWeight: '700', color: Colors.ink3, fontFamily: 'SchibstedGrotesk_700Bold' },
+  savesPill: {
+    marginLeft: 'auto',
+    backgroundColor: Colors.greenSoft,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 999,
+  },
+  savesText: { fontSize: 12, fontWeight: '700', color: Colors.green, fontFamily: 'SchibstedGrotesk_700Bold' },
+  emptyHint: { fontSize: 13, color: Colors.ink3, marginTop: 10, fontFamily: 'SchibstedGrotesk_400Regular' },
+
+  // Where to save
+  storesCard: {
+    backgroundColor: Colors.surface,
+    borderRadius: 22,
+    overflow: 'hidden',
+    ...Shadows.card,
+  },
+  storeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+  },
+  storeRowBorder: { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: Colors.line },
+  storeMonogram: { width: 40, height: 40, borderRadius: 13, alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
+  storeMonogramText: { color: '#fff', fontWeight: '700', fontSize: 16, fontFamily: 'SchibstedGrotesk_700Bold' },
+  storeName: { fontSize: 15, fontWeight: '700', color: Colors.ink, fontFamily: 'SchibstedGrotesk_700Bold' },
+  storeItemCount: { fontSize: 12, color: Colors.ink3, marginTop: 1, fontFamily: 'SchibstedGrotesk_400Regular' },
+  storeSaving: { fontSize: 15, fontWeight: '700', color: Colors.green, fontFamily: 'SchibstedGrotesk_800ExtraBold', fontVariant: ['tabular-nums'] as any },
+  storeChev: { fontSize: 20, color: Colors.ink3, marginLeft: 2 },
 })

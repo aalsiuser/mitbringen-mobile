@@ -15,7 +15,7 @@ export default function NotFoundScreen() {
 }
 
 const s = StyleSheet.create({
-  container: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 20, backgroundColor: Colors.appBg },
+  container: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 20, backgroundColor: Colors.bg },
   title: { fontSize: 20, fontWeight: '600', color: Colors.ink },
   link: { marginTop: 15, paddingVertical: 15 },
   linkText: { fontSize: 14, color: Colors.green },
