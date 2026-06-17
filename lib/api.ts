@@ -1,6 +1,6 @@
 import { getItemAsync, setItemAsync, deleteItemAsync } from 'expo-secure-store'
 
-const BASE_URL = 'http://192.168.0.160:3000/api/v1'
+const BASE_URL = process.env.EXPO_PUBLIC_API_URL ?? 'http://192.168.0.160:3000/api/v1'
 const TOKEN_KEY = 'auth_token'
 
 export async function getToken() {
@@ -72,14 +72,19 @@ export const savingsApi = {
     api.post<{ id: number; amount: number }>('/savings', { amount }),
 }
 
+export type MeResponse = {
+  id: number
+  name: string | null
+  email: string
+  monthly_savings_goal: number | null
+  saved_this_month: number
+  shops_this_month: number
+}
+
 export const usersApi = {
-  me: () => api.get<{
-    id: number
-    email: string
-    monthly_savings_goal: number | null
-    saved_this_month: number
-    shops_this_month: number
-  }>('/users/me'),
+  me: () => api.get<MeResponse>('/users/me'),
+  update: (fields: Partial<Pick<MeResponse, 'name' | 'email' | 'monthly_savings_goal'>>) =>
+    api.patch<MeResponse>('/users/me', { user: fields }),
 }
 
 export const itemsApi = {

@@ -1,14 +1,17 @@
 import { useState } from 'react'
 import { View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, ActivityIndicator } from 'react-native'
+import { useTranslation } from 'react-i18next'
 import { Colors } from '@/constants/colors'
 import { useApp } from '@/lib/AppContext'
-
-const PRESETS = ['Wocheneinkauf', 'Bauernmarkt', 'Vorrat auffüllen', 'WG-Einkauf']
+import { MitbringenWordmark } from '@/components/ui/MitbringenMark'
 
 export function OnboardNameScreen() {
   const { listName, setListName, saveListName } = useApp()
+  const { t } = useTranslation()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+
+  const presets = t('onboard.presets', { returnObjects: true }) as string[]
 
   const submit = async () => {
     if (!listName.trim()) return
@@ -17,7 +20,7 @@ export function OnboardNameScreen() {
     try {
       await saveListName(listName.trim())
     } catch {
-      setError('Something went wrong. Please try again.')
+      setError(t('common.errorGeneric'))
       setLoading(false)
     }
   }
@@ -25,25 +28,22 @@ export function OnboardNameScreen() {
   return (
     <View style={s.root}>
       <ScrollView style={s.scroll} contentContainerStyle={s.content}>
-        <View style={s.wordmark}>
-          <View style={s.dot} />
-          <Text style={s.wordmarkText}>mitbringen</Text>
-        </View>
+        <MitbringenWordmark size={17} />
 
         <View style={{ marginTop: 64 }}>
-          <Text style={s.eyebrow}>Schritt 1 von 2</Text>
-          <Text style={s.headline}>Name your first{'\n'}shopping list</Text>
-          <Text style={s.sub}>Every shop starts with a list. We'll find the cheapest price in Vienna for everything you add.</Text>
+          <Text style={s.eyebrow}>{t('onboard.stepNOfM', { n: 1, m: 2 })}</Text>
+          <Text style={s.headline}>{t('onboard.nameHeadline')}</Text>
+          <Text style={s.sub}>{t('onboard.nameSub')}</Text>
         </View>
 
         <TextInput
           style={s.input} value={listName} onChangeText={setListName}
-          placeholder="z. B. Wocheneinkauf" placeholderTextColor={Colors.ink3}
+          placeholder={t('onboard.namePlaceholder')} placeholderTextColor={Colors.ink3}
           autoFocus returnKeyType="done" onSubmitEditing={submit}
         />
 
         <View style={s.chips}>
-          {PRESETS.map((p) => (
+          {presets.map((p) => (
             <TouchableOpacity key={p} onPress={() => setListName(p)}
               style={[s.chip, listName === p && s.chipActive]}>
               <Text style={[s.chipText, listName === p && s.chipTextActive]}>{p}</Text>
@@ -61,7 +61,7 @@ export function OnboardNameScreen() {
         >
           {loading
             ? <ActivityIndicator color="#fff" />
-            : <Text style={s.btnText}>Create list →</Text>
+            : <Text style={s.btnText}>{t('onboard.ctaCreateList')} →</Text>
           }
         </TouchableOpacity>
       </View>
@@ -73,9 +73,6 @@ const s = StyleSheet.create({
   root: { flex: 1, backgroundColor: Colors.bg },
   scroll: { flex: 1 },
   content: { paddingHorizontal: 22, paddingTop: 60, paddingBottom: 20 },
-  wordmark: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  dot: { width: 9, height: 9, borderRadius: 999, backgroundColor: Colors.green },
-  wordmarkText: { fontSize: 17, fontWeight: '700', letterSpacing: -0.5, color: Colors.ink, fontFamily: 'SchibstedGrotesk_700Bold' },
   eyebrow: { fontSize: 11.5, fontWeight: '700', letterSpacing: 1.5, textTransform: 'uppercase', color: Colors.green, fontFamily: 'SchibstedGrotesk_700Bold' },
   headline: { fontSize: 32, fontWeight: '700', letterSpacing: -0.8, lineHeight: 38, color: Colors.ink, marginTop: 14, fontFamily: 'SchibstedGrotesk_700Bold' },
   sub: { fontSize: 16, color: Colors.ink2, lineHeight: 24, marginTop: 12, fontFamily: 'SchibstedGrotesk_400Regular' },

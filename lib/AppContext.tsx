@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
-import { getToken, api, listsApi, itemsApi, savingsApi, usersApi } from './api'
+import { getToken, api, listsApi, itemsApi, savingsApi, usersApi, type MeResponse } from './api'
 import { signIn as apiSignIn, signUp as apiSignUp, signOut as apiSignOut } from './auth'
 import type { Product, ListItem, ApiProduct } from './types'
 
@@ -7,6 +7,7 @@ type Phase = 'auth' | 'onboard-name' | 'onboard-goal' | 'app'
 
 interface User {
   id: number
+  name: string | null
   email: string
 }
 
@@ -17,6 +18,7 @@ interface AppState {
   signUp: (email: string, password: string) => Promise<void>
   signIn: (email: string, password: string) => Promise<void>
   signOut: () => Promise<void>
+  updateProfile: (fields: { name?: string; email?: string }) => Promise<void>
   saveListName: (name: string) => Promise<void>
   saveGoal: (goal: number | null) => Promise<void>
   currentListId: number | null
@@ -26,6 +28,7 @@ interface AppState {
   setGoal: (g: number) => void
   items: ListItem[]
   addItem: (product: ApiProduct) => Promise<void>
+  addCustomItem: (name: string) => Promise<void>
   removeItem: (id: number) => Promise<void>
   saved: number
   shops: number
@@ -51,6 +54,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const loadUserData = async () => {
     const [me, lists] = await Promise.all([usersApi.me(), listsApi.index()])
+    setUser({ id: me.id, name: me.name, email: me.email })
     if (me.monthly_savings_goal) setGoal(Number(me.monthly_savings_goal))
     setSaved(me.saved_this_month)
     setShops(me.shops_this_month)
@@ -84,15 +88,19 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const signUp = async (email: string, password: string) => {
     const u = await apiSignUp(email, password)
-    setUser({ id: u.id, email: u.email })
+    setUser({ id: u.id, name: null, email: u.email })
     setPhase('onboard-name')
   }
 
   const signIn = async (email: string, password: string) => {
-    const u = await apiSignIn(email, password)
-    setUser(u)
+    await apiSignIn(email, password)
     setPhase('app')
     await loadUserData()
+  }
+
+  const updateProfile = async (fields: { name?: string; email?: string }) => {
+    const me = await usersApi.update(fields)
+    setUser({ id: me.id, name: me.name, email: me.email })
   }
 
   const signOut = async () => {
@@ -126,6 +134,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setItems((xs) => (xs.find((x) => x.id === item.id) ? xs : [item, ...xs]))
   }
 
+  const addCustomItem = async (name: string) => {
+    if (!currentListId) return
+    const item = await itemsApi.create(currentListId, name)
+    setItems((xs) => (xs.find((x) => x.id === item.id) ? xs : [item, ...xs]))
+  }
+
   const removeItem = async (id: number) => {
     if (!currentListId) return
     await itemsApi.destroy(currentListId, id)
@@ -144,12 +158,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
   return (
     <AppContext.Provider value={{
       phase, setPhase,
-      user, signUp, signIn, signOut,
+      user, signUp, signIn, signOut, updateProfile,
       saveListName, saveGoal,
       currentListId,
       listName, setListName,
       goal, setGoal,
-      items, addItem, removeItem,
+      items, addItem, addCustomItem, removeItem,
       saved, shops, justBanked, bankSavings,
       assistantOpen, setAssistantOpen,
     }}>

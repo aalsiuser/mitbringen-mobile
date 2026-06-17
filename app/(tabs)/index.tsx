@@ -2,12 +2,12 @@ import { ScrollView, View, Text, TouchableOpacity, StyleSheet } from 'react-nati
 import { LinearGradient } from 'expo-linear-gradient'
 import { useRouter } from 'expo-router'
 import { SafeAreaView } from 'react-native-safe-area-context'
+import { useTranslation } from 'react-i18next'
+import Svg, { Path } from 'react-native-svg'
 import { Colors, Shadows } from '@/constants/colors'
 import { useApp } from '@/lib/AppContext'
 import { useTween } from '@/hooks/useTween'
-import { fmt } from '@/lib/data'
-
-const MONTH = new Date().toLocaleString('de-AT', { month: 'long' })
+import { fmtCurrency, decimalSep, currentMonthName } from '@/lib/i18n'
 
 // Group items by their cheapest store and pick top 3 by count
 function topStores(items: ReturnType<typeof useApp>['items']) {
@@ -41,13 +41,14 @@ function BigEuro({ value, color = '#fff' }: { value: number; color?: string }) {
     <View style={{ flexDirection: 'row', alignItems: 'flex-start' }}>
       <Text style={[s.heroEuroSign, { color }]}>€</Text>
       <Text style={[s.heroAmount, { color }]}>{int}</Text>
-      <Text style={[s.heroCents, { color }]}>,{dec}</Text>
+      <Text style={[s.heroCents, { color }]}>{decimalSep()}{dec}</Text>
     </View>
   )
 }
 
 export default function HomeTab() {
   const { saved, goal, items, listName, justBanked, user, signOut } = useApp()
+  const { t } = useTranslation()
   const router = useRouter()
   const pct = goal > 0 ? Math.min(100, (saved / goal) * 100) : 0
   const remaining = Math.max(0, goal - saved)
@@ -58,17 +59,18 @@ export default function HomeTab() {
   }, 0)
 
   const stores = topStores(items)
-  const initial = (user?.email?.[0] ?? 'A').toUpperCase()
+  const displayName = user?.name || user?.email?.split('@')[0] || t('home.greetingFallback')
+  const initial = (user?.name?.[0] ?? user?.email?.[0] ?? 'A').toUpperCase()
 
   return (
     <SafeAreaView style={s.root} edges={['top']}>
       {/* Top bar */}
       <View style={s.topBar}>
         <View>
-          <Text style={s.greeting}>Guten Morgen,</Text>
-          <Text style={s.greetingName}>{user?.email?.split('@')[0] ?? 'Anna'}</Text>
+          <Text style={s.greeting}>{t('home.greetingMorning')}</Text>
+          <Text style={s.greetingName}>{displayName}</Text>
         </View>
-        <TouchableOpacity onPress={signOut} style={s.avatar}>
+        <TouchableOpacity onPress={() => router.push('/(tabs)/profile')} style={s.avatar}>
           <Text style={s.avatarText}>{initial}</Text>
         </TouchableOpacity>
       </View>
@@ -76,7 +78,7 @@ export default function HomeTab() {
       {/* Bank toast */}
       {justBanked > 0 && (
         <View style={s.toast} pointerEvents="none">
-          <Text style={s.toastText}>🎉 Banked {fmt(justBanked)} into your savings</Text>
+          <Text style={s.toastText}>{t('home.bankedToast', { amount: fmtCurrency(justBanked) })}</Text>
         </View>
       )}
 
@@ -93,10 +95,10 @@ export default function HomeTab() {
           <View style={s.decCircle2} />
 
           <View style={s.heroTop}>
-            <Text style={s.heroEyebrow}>Saved in {MONTH}</Text>
+            <Text style={s.heroEyebrow}>{t('home.savedInMonth', { month: currentMonthName() })}</Text>
             {saved > 0 && (
               <View style={s.weekChip}>
-                <Text style={s.weekChipText}>↑ {fmt(predicted > 0 ? predicted : 0)} this week</Text>
+                <Text style={s.weekChipText}>{t('home.weekChip', { amount: fmtCurrency(predicted > 0 ? predicted : 0) })}</Text>
               </View>
             )}
           </View>
@@ -109,46 +111,30 @@ export default function HomeTab() {
                 <View style={[s.progressFill, { width: `${pct}%` }]} />
               </View>
               <View style={s.progressMeta}>
-                <Text style={s.progressLeft}>{Math.round(pct)}% of {fmt(goal)} goal</Text>
-                <Text style={s.progressRight}>{fmt(remaining)} to go</Text>
+                <Text style={s.progressLeft}>{t('home.goalPct', { pct: Math.round(pct), goal: fmtCurrency(goal) })}</Text>
+                <Text style={s.progressRight}>{t('home.toGo', { amount: fmtCurrency(remaining) })}</Text>
               </View>
             </View>
           )}
         </LinearGradient>
 
-        {/* Quick actions */}
-        <View style={s.quickGrid}>
-          <TouchableOpacity style={s.quickTile} onPress={() => router.push('/(tabs)/list')} activeOpacity={0.8}>
-            <View style={[s.quickIcon, { backgroundColor: Colors.blueSoft }]}>
-              <Text style={{ fontSize: 18 }}>＋</Text>
-            </View>
-            <Text style={s.quickLabel}>New list</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={s.quickTile} activeOpacity={0.8}>
-            <View style={[s.quickIcon, { backgroundColor: Colors.coralSoft }]}>
-              <Text style={{ fontSize: 18 }}>🧾</Text>
-            </View>
-            <Text style={s.quickLabel}>Scan bill</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={s.quickTile} activeOpacity={0.8}>
-            <View style={[s.quickIcon, { backgroundColor: Colors.greenSoft }]}>
-              <Text style={{ fontSize: 18 }}>%</Text>
-            </View>
-            <Text style={s.quickLabel}>Deals</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={s.quickTile} activeOpacity={0.8}>
-            <View style={[s.quickIcon, { backgroundColor: Colors.violetSoft }]}>
-              <Text style={{ fontSize: 18 }}>◎</Text>
-            </View>
-            <Text style={s.quickLabel}>Goal</Text>
-          </TouchableOpacity>
-        </View>
+        {/* Quick actions — only shown when the list is empty */}
+        {items.length === 0 && (
+          <View style={s.quickGrid}>
+            <TouchableOpacity style={s.quickTile} onPress={() => router.push('/(tabs)/list')} activeOpacity={0.8}>
+              <View style={[s.quickIcon, { backgroundColor: Colors.blueSoft }]}>
+                <Text style={{ fontSize: 18 }}>＋</Text>
+              </View>
+              <Text style={s.quickLabel}>{t('home.quickNewList')}</Text>
+            </TouchableOpacity>
+          </View>
+        )}
 
         {/* Your list section */}
         <View style={s.sectionHeader}>
-          <Text style={s.sectionTitle}>Your list</Text>
+          <Text style={s.sectionTitle}>{t('home.sectionYourList')}</Text>
           <TouchableOpacity onPress={() => router.push('/(tabs)/list')}>
-            <Text style={s.sectionLink}>Open</Text>
+            <Text style={s.sectionLink}>{t('home.open')}</Text>
           </TouchableOpacity>
         </View>
 
@@ -156,10 +142,12 @@ export default function HomeTab() {
           <View style={s.listCardTop}>
             <View style={{ flex: 1 }}>
               <Text style={s.listName}>{listName}</Text>
-              <Text style={s.listMeta}>{items.length} item{items.length === 1 ? '' : 's'}{items.length > 0 ? ' · ready to shop' : ''}</Text>
+              <Text style={s.listMeta}>{t('home.itemsCount', { count: items.length })}{items.length > 0 ? ` · ${t('home.readyToShop')}` : ''}</Text>
             </View>
             <TouchableOpacity style={s.listBtn} onPress={() => router.push('/(tabs)/list')} activeOpacity={0.8}>
-              <Text style={{ color: '#fff', fontSize: 18 }}>↻</Text>
+              <Svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
+                <Path d="M5 12h14M13 5l7 7-7 7" />
+              </Svg>
             </TouchableOpacity>
           </View>
 
@@ -177,14 +165,14 @@ export default function HomeTab() {
               )}
               {predicted > 0 && (
                 <View style={s.savesPill}>
-                  <Text style={s.savesText}>saves {fmt(predicted)}</Text>
+                  <Text style={s.savesText}>{t('home.savesPill', { amount: fmtCurrency(predicted) })}</Text>
                 </View>
               )}
             </View>
           )}
 
           {items.length === 0 && (
-            <Text style={s.emptyHint}>Empty — tap Open to add items</Text>
+            <Text style={s.emptyHint}>{t('home.emptyListHint')}</Text>
           )}
         </View>
 
@@ -192,7 +180,7 @@ export default function HomeTab() {
         {stores.length > 0 && (
           <>
             <View style={s.sectionHeader}>
-              <Text style={s.sectionTitle}>Where to save this week</Text>
+              <Text style={s.sectionTitle}>{t('home.sectionWhereToSave')}</Text>
             </View>
             <View style={s.storesCard}>
               {stores.map(([slug, store], idx) => (
@@ -207,9 +195,9 @@ export default function HomeTab() {
                   </View>
                   <View style={{ flex: 1 }}>
                     <Text style={s.storeName}>{store.name}</Text>
-                    <Text style={s.storeItemCount}>{store.count} of your items on offer</Text>
+                    <Text style={s.storeItemCount}>{t('home.itemsOnOffer', { count: store.count })}</Text>
                   </View>
-                  <Text style={s.storeSaving}>{fmt(store.saving)}</Text>
+                  <Text style={s.storeSaving}>{fmtCurrency(store.saving)}</Text>
                   <Text style={s.storeChev}>›</Text>
                 </TouchableOpacity>
               ))}
@@ -265,7 +253,9 @@ const s = StyleSheet.create({
   // Blue hero card
   heroCard: {
     borderRadius: 26,
-    padding: 22,
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 18,
     overflow: 'hidden',
     ...Shadows.blue,
   },
@@ -296,10 +286,10 @@ const s = StyleSheet.create({
   heroAmount: { fontSize: 54, fontWeight: '800', lineHeight: 54, letterSpacing: -1, fontFamily: 'SchibstedGrotesk_800ExtraBold', fontVariant: ['tabular-nums'] as any },
   heroCents: { fontSize: 24, fontWeight: '800', marginTop: 8, fontFamily: 'SchibstedGrotesk_800ExtraBold', fontVariant: ['tabular-nums'] as any },
 
-  heroProgress: { marginTop: 18 },
-  progressTrack: { height: 8, borderRadius: 999, backgroundColor: 'rgba(255,255,255,0.25)', overflow: 'hidden' },
-  progressFill: { height: 8, borderRadius: 999, backgroundColor: '#fff' },
-  progressMeta: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 8 },
+  heroProgress: { marginTop: 16 },
+  progressTrack: { height: 7, borderRadius: 999, backgroundColor: 'rgba(255,255,255,0.25)', overflow: 'hidden' },
+  progressFill: { height: 7, borderRadius: 999, backgroundColor: '#fff' },
+  progressMeta: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 7 },
   progressLeft: { fontSize: 12, color: '#fff', fontFamily: 'SchibstedGrotesk_400Regular' },
   progressRight: { fontSize: 12, color: 'rgba(255,255,255,0.65)', fontFamily: 'SchibstedGrotesk_400Regular' },
 
@@ -307,19 +297,21 @@ const s = StyleSheet.create({
   quickGrid: {
     flexDirection: 'row',
     gap: 10,
-    marginTop: 18,
+    marginTop: 16,
   },
   quickTile: {
-    flex: 1,
+    width: '48.5%',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
     backgroundColor: Colors.surface,
     borderRadius: 18,
-    padding: 12,
-    alignItems: 'center',
-    gap: 8,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
     ...Shadows.card,
   },
   quickIcon: { width: 38, height: 38, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
-  quickLabel: { fontSize: 11, fontWeight: '600', color: Colors.ink2, textAlign: 'center', fontFamily: 'SchibstedGrotesk_700Bold' },
+  quickLabel: { fontSize: 14, fontWeight: '700', color: Colors.ink, letterSpacing: -0.14, fontFamily: 'SchibstedGrotesk_700Bold' },
 
   // Section header
   sectionHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 22, marginBottom: 10 },

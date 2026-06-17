@@ -3,10 +3,12 @@ import { View, Text, ScrollView, TouchableOpacity, StyleSheet, ActivityIndicator
 import { LinearGradient } from 'expo-linear-gradient'
 import { useRouter } from 'expo-router'
 import { SafeAreaView } from 'react-native-safe-area-context'
+import { useTranslation } from 'react-i18next'
 import { Colors, Shadows } from '@/constants/colors'
 import { useApp } from '@/lib/AppContext'
 import { api } from '@/lib/api'
 import { useTween } from '@/hooks/useTween'
+import { fmtCurrency, decimalSep } from '@/lib/i18n'
 
 const STORE_COLORS: Record<string, string> = {
   hofer:      Colors.store.hofer,
@@ -16,7 +18,7 @@ const STORE_COLORS: Record<string, string> = {
   billa_plus: Colors.store.billa_plus,
 }
 
-const fmt = (n: number | null | undefined) => n != null ? '€' + Number(n).toFixed(2) : '—'
+const fmt = fmtCurrency
 const discountPct = (promo: number | null, regular: number | null) => {
   if (!promo || !regular || regular <= 0) return 0
   return Math.round((1 - promo / regular) * 100)
@@ -54,13 +56,14 @@ function BigSaving({ value }: { value: number }) {
     <View style={{ flexDirection: 'row', alignItems: 'flex-start' }}>
       <Text style={[s.heroEuroSign, { color: '#fff' }]}>€</Text>
       <Text style={[s.heroAmount, { color: '#fff' }]}>{int}</Text>
-      <Text style={[s.heroCents, { color: '#fff' }]}>,{dec}</Text>
+      <Text style={[s.heroCents, { color: '#fff' }]}>{decimalSep()}{dec}</Text>
     </View>
   )
 }
 
 export default function StoreRecScreen() {
   const { currentListId, bankSavings } = useApp()
+  const { t } = useTranslation()
   const router = useRouter()
   const [result, setResult] = useState<OptimiseResult | null>(null)
   const [loading, setLoading] = useState(true)
@@ -95,20 +98,20 @@ export default function StoreRecScreen() {
       {/* Back header */}
       <View style={s.header}>
         <TouchableOpacity onPress={() => router.back()} style={s.backBtn} activeOpacity={0.7}>
-          <Text style={s.backText}>← Back</Text>
+          <Text style={s.backText}>← {t('common.back')}</Text>
         </TouchableOpacity>
-        <Text style={s.headerTitle}>Where to shop</Text>
+        <Text style={s.headerTitle}>{t('store.headerTitle')}</Text>
         <View style={{ width: 60 }} />
       </View>
 
       {loading ? (
         <View style={s.centered}>
           <ActivityIndicator size="large" color={Colors.blue} />
-          <Text style={s.loadingText}>Finding best deals…</Text>
+          <Text style={s.loadingText}>{t('store.loading')}</Text>
         </View>
       ) : !result || stops.length === 0 ? (
         <View style={s.centered}>
-          <Text style={s.emptyText}>No matching deals found this week.</Text>
+          <Text style={s.emptyText}>{t('store.noDeals')}</Text>
         </View>
       ) : (
         <>
@@ -122,14 +125,14 @@ export default function StoreRecScreen() {
             >
               <View style={s.decCircle1} />
               <View style={s.decCircle2} />
-              <Text style={s.heroEyebrow}>Most you can save</Text>
+              <Text style={s.heroEyebrow}>{t('store.mostYouCanSave')}</Text>
               <BigSaving value={result.total_saving} />
               <Text style={s.heroSub}>
-                across {result.total_items} item{result.total_items === 1 ? '' : 's'} this shop
+                {t('store.acrossItems', { count: result.total_items })}
               </Text>
             </LinearGradient>
 
-            <Text style={s.compareLabel}>Compare stores</Text>
+            <Text style={s.compareLabel}>{t('store.compareStores')}</Text>
 
             <View style={{ gap: 12 }}>
               {stops.map((stop, idx) => {
@@ -142,7 +145,7 @@ export default function StoreRecScreen() {
                     {/* BEST CHOICE ribbon — first child so overflow:hidden doesn't clip */}
                     {best && (
                       <View style={s.ribbon}>
-                        <Text style={s.ribbonText}>✦  BEST CHOICE</Text>
+                        <Text style={s.ribbonText}>{t('store.bestChoice')}</Text>
                       </View>
                     )}
 
@@ -164,12 +167,12 @@ export default function StoreRecScreen() {
                           </View>
                         </View>
                         <Text style={s.itemsOnOffer}>
-                          {stop.covered_count} item{stop.covered_count === 1 ? '' : 's'} on offer
+                          {t('store.itemsOnOffer', { count: stop.covered_count })}
                         </Text>
                       </View>
 
                       <View style={{ alignItems: 'flex-end' }}>
-                        <Text style={s.savesEyebrow}>You save</Text>
+                        <Text style={s.savesEyebrow}>{t('store.youSave')}</Text>
                         <Text style={s.savesAmount}>{fmt(stop.saving)}</Text>
                       </View>
 
@@ -180,8 +183,8 @@ export default function StoreRecScreen() {
                     {open && (
                       <View style={[s.expanded, { borderTopColor: best ? Colors.blueSoft : Colors.line }]}>
                         <View style={s.expandedHeader}>
-                          <Text style={s.expandedLabel}>Products on offer here</Text>
-                          <Text style={s.expandedSpend}>spend {fmt(stop.promo_total)}</Text>
+                          <Text style={s.expandedLabel}>{t('store.productsOnOffer')}</Text>
+                          <Text style={s.expandedSpend}>{t('store.spend', { amount: fmt(stop.promo_total) })}</Text>
                         </View>
                         <View style={{ gap: 10 }}>
                           {stop.items.map((item) => {
@@ -221,7 +224,7 @@ export default function StoreRecScreen() {
           {/* Dark bank CTA */}
           <View style={s.footer}>
             <TouchableOpacity style={s.bankBtn} onPress={handleBank} activeOpacity={0.85}>
-              <Text style={s.bankBtnText}>✓  I shopped — bank {fmt(result.total_saving)}</Text>
+              <Text style={s.bankBtnText}>{t('store.bankCta', { amount: fmt(result.total_saving) })}</Text>
             </TouchableOpacity>
           </View>
         </>

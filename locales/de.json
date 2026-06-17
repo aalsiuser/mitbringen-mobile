@@ -1,0 +1,153 @@
+{
+  "common": {
+    "next": "Weiter",
+    "back": "Zurück",
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "loading": "Lädt…",
+    "errorGeneric": "Etwas ist schiefgelaufen. Bitte versuche es erneut."
+  },
+
+  "auth": {
+    "headlineSignup": "Bei jedem\nEinkauf sparen",
+    "headlineLogin": "Willkommen zurück",
+    "subSignup": "Verfolge die günstigsten Preise und sieh deine Ersparnisse wachsen.",
+    "subLogin": "Melde dich an und mach mit deiner Liste weiter.",
+    "dividerEmail": "mit E-Mail anmelden",
+    "emailPlaceholder": "du@email.com",
+    "passwordPlaceholder": "Passwort (mind. 6 Zeichen)",
+    "forgotPassword": "Passwort vergessen?",
+    "errorEmail": "Bitte gib eine gültige E-Mail-Adresse ein.",
+    "errorPassword": "Das Passwort muss mindestens 6 Zeichen lang sein.",
+    "ctaCreate": "Konto erstellen",
+    "ctaLogin": "Anmelden",
+    "termsPrefix": "Mit dem Fortfahren stimmst du unseren ",
+    "terms": "AGB",
+    "and": " & ",
+    "privacy": "Datenschutzrichtlinien",
+    "termsSuffix": " zu.",
+    "switchToLogin": "Hast du schon ein Konto? ",
+    "switchToSignup": "Neu bei mitbringen? ",
+    "linkLogin": "Anmelden",
+    "linkCreate": "Konto erstellen"
+  },
+
+  "onboard": {
+    "stepNOfM": "Schritt {{n}} von {{m}}",
+    "nameHeadline": "Benenne deine erste\nEinkaufsliste",
+    "nameSub": "Jeder Einkauf beginnt mit einer Liste. Wir finden den günstigsten Preis für alles, was du hinzufügst.",
+    "namePlaceholder": "z. B. Wocheneinkauf",
+    "presets": ["Wocheneinkauf", "Bauernmarkt", "Vorrat auffüllen", "WG-Einkauf"],
+    "ctaCreateList": "Liste erstellen",
+    "goalHeadline": "Setze ein monatliches\nSparziel",
+    "goalSub": "Wir verfolgen jeden Euro, den du sparst — und feuern dich an, je voller es wird.",
+    "perMonth": "pro Monat",
+    "ctaStart": "Sparen starten",
+    "ctaSkip": "Später entscheiden"
+  },
+
+  "home": {
+    "greetingMorning": "Guten Morgen,",
+    "greetingFallback": "schön dich zu sehen",
+    "savedInMonth": "Gespart im {{month}}",
+    "weekChip": "↑ {{amount}} diese Woche",
+    "goalPct": "{{pct}} % von {{goal}} Ziel",
+    "toGo": "noch {{amount}}",
+    "quickNewList": "Neue Liste",
+    "quickScanBill": "Beleg scannen",
+    "sectionYourList": "Deine Liste",
+    "open": "Öffnen",
+    "itemsCount_one": "{{count}} Artikel",
+    "itemsCount_other": "{{count}} Artikel",
+    "readyToShop": "bereit zum Einkaufen",
+    "savesPill": "spart {{amount}}",
+    "emptyListHint": "Leer — tippe auf Öffnen, um Artikel hinzuzufügen",
+    "sectionWhereToSave": "Wo du diese Woche sparst",
+    "itemsOnOffer_one": "{{count}} deiner Artikel im Angebot",
+    "itemsOnOffer_other": "{{count}} deiner Artikel im Angebot",
+    "bankedToast": "🎉 {{amount}} auf dein Sparkonto überwiesen"
+  },
+
+  "list": {
+    "searchPlaceholder": "Artikel hinzufügen — „Milch“, „Käse“…",
+    "emptyTitle": "Deine Liste ist leer",
+    "emptySub": "Suche oben, um Artikel zum\ngünstigsten Preis hinzuzufügen.",
+    "noPriceFound": "Diese Woche kein Preis gefunden",
+    "youllSave": "Du sparst",
+    "basketTotal": "Warenkorb gesamt",
+    "findWhereToShop": "📍 Finde, wo du einkaufen sollst",
+    "addCustom": "„{{name}}“ hinzufügen",
+    "addCustomSubMatches": "Nicht die richtige Aktion? Trotzdem hinzufügen",
+    "addCustomSubNone": "Keine Aktion gefunden — trotzdem zur Liste",
+    "noOfferPill": "Keine Aktion",
+    "noOfferMeta": "Nicht in Aktion · jeder Markt"
+  },
+
+  "store": {
+    "headerTitle": "Wo einkaufen",
+    "loading": "Beste Angebote werden gesucht…",
+    "noDeals": "Diese Woche keine passenden Angebote gefunden.",
+    "mostYouCanSave": "Du kannst maximal sparen",
+    "acrossItems_one": "bei {{count}} Artikel in diesem Einkauf",
+    "acrossItems_other": "bei {{count}} Artikeln in diesem Einkauf",
+    "compareStores": "Geschäfte vergleichen",
+    "bestChoice": "✦  BESTE WAHL",
+    "itemsOnOffer_one": "{{count}} Artikel im Angebot",
+    "itemsOnOffer_other": "{{count}} Artikel im Angebot",
+    "youSave": "Du sparst",
+    "productsOnOffer": "Produkte hier im Angebot",
+    "spend": "Ausgaben {{amount}}",
+    "bankCta": "✓  Einkauf erledigt — {{amount}} sichern"
+  },
+
+  "profile": {
+    "savedWith": "{{amount}} mit mitbringen gespart",
+    "account": "Konto",
+    "preferences": "Einstellungen",
+    "name": "Name",
+    "email": "E-Mail",
+    "signOut": "Abmelden",
+    "language": "Sprache",
+    "editNameTitle": "Name bearbeiten",
+    "editEmailTitle": "E-Mail bearbeiten",
+    "yourNameLabel": "Dein Name",
+    "emailAddressLabel": "E-Mail-Adresse",
+    "nameInputPlaceholder": "z. B. Anna Bauer",
+    "emailInputPlaceholder": "du@beispiel.com",
+    "errorEmail": "Bitte gib eine gültige E-Mail-Adresse ein.",
+    "saveChanges": "Änderungen speichern",
+    "signOutTitle": "Abmelden?",
+    "signOutSub": "Du musst dich erneut anmelden, um deine Listen und Ersparnisse zu sehen.",
+    "chooseLanguageTitle": "Sprache",
+    "chooseLanguageSub": "Wähle die Sprache, in der du die App nutzen möchtest."
+  },
+
+  "assistant": {
+    "title": "Assistent",
+    "subtitle": "Dein persönlicher Einkaufsbegleiter",
+    "comingSoon": "BALD VERFÜGBAR",
+    "exampleQuestion": "Wo finde ich Hafermilch im Angebot in der Nähe?",
+    "exampleAnswer": "Hofer in der Nähe hat sie diese Woche für €1,19 — das sind 30 % Rabatt. Aktuell das günstigste Angebot in allen Geschäften in deiner Nähe.",
+    "unlocksSoon": "Bald verfügbar",
+    "capFindTitle": "Alles finden",
+    "capFindDesc": "„Wo gibt es glutenfreie Pasta in der Nähe?“",
+    "capSwapTitle": "Clevere Alternativen",
+    "capSwapDesc": "Günstigere Alternativen zu deiner Liste",
+    "capTasteTitle": "Lernt deinen Geschmack",
+    "capTasteDesc": "Schlägt Lebensmittel vor, die du lieben wirst",
+    "ctaNotify": "Benachrichtige mich, wenn's so weit ist",
+    "ctaNotified": "Wir sagen dir Bescheid"
+  },
+
+  "lang": {
+    "en": "English",
+    "de": "Deutsch"
+  },
+
+  "tabs": {
+    "home": "Start",
+    "lists": "Listen",
+    "assistant": "Assistent",
+    "profile": "Profil"
+  }
+}

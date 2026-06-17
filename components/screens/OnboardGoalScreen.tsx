@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native'
 import Slider from '@react-native-community/slider'
+import { useTranslation } from 'react-i18next'
 import { Colors } from '@/constants/colors'
 import { useApp } from '@/lib/AppContext'
 
@@ -8,6 +9,7 @@ const PRESETS = [30, 50, 80, 120]
 
 export function OnboardGoalScreen() {
   const { goal, setGoal, saveGoal } = useApp()
+  const { t } = useTranslation()
   const [loading, setLoading] = useState(false)
 
   const submit = async (goalValue: number | null) => {
@@ -22,15 +24,15 @@ export function OnboardGoalScreen() {
   return (
     <View style={s.root}>
       <View style={s.content}>
-        <Text style={s.eyebrow}>Schritt 2 von 2</Text>
-        <Text style={s.headline}>Set a monthly{'\n'}savings goal</Text>
-        <Text style={s.sub}>We'll track every euro you save against this — and cheer you on as it fills up.</Text>
+        <Text style={s.eyebrow}>{t('onboard.stepNOfM', { n: 2, m: 2 })}</Text>
+        <Text style={s.headline}>{t('onboard.goalHeadline')}</Text>
+        <Text style={s.sub}>{t('onboard.goalSub')}</Text>
 
         <View style={s.heroNum}>
           <Text style={s.euro}>€</Text>
           <Text style={s.amount}>{goal}</Text>
         </View>
-        <Text style={s.perMonth}>per month</Text>
+        <Text style={s.perMonth}>{t('onboard.perMonth')}</Text>
 
         <View style={s.sliderWrap}>
           <Slider
@@ -57,11 +59,11 @@ export function OnboardGoalScreen() {
         <TouchableOpacity style={[s.btn, { opacity: loading ? 0.6 : 1 }]} onPress={() => submit(goal)} activeOpacity={0.85} disabled={loading}>
           {loading
             ? <ActivityIndicator color="#fff" />
-            : <Text style={s.btnText}>Start saving →</Text>
+            : <Text style={s.btnText}>{t('onboard.ctaStart')} →</Text>
           }
         </TouchableOpacity>
         <TouchableOpacity style={s.btnGhost} onPress={() => submit(null)} activeOpacity={0.7} disabled={loading}>
-          <Text style={s.btnGhostText}>I'll decide later</Text>
+          <Text style={s.btnGhostText}>{t('onboard.ctaSkip')}</Text>
         </TouchableOpacity>
       </View>
     </View>

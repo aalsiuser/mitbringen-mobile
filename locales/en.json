@@ -1,0 +1,153 @@
+{
+  "common": {
+    "next": "Next",
+    "back": "Back",
+    "save": "Save",
+    "cancel": "Cancel",
+    "loading": "Loading…",
+    "errorGeneric": "Something went wrong. Please try again."
+  },
+
+  "auth": {
+    "headlineSignup": "Save money on\nevery shop",
+    "headlineLogin": "Welcome back",
+    "subSignup": "Track the cheapest prices and watch your savings add up.",
+    "subLogin": "Log in to pick up your list where you left off.",
+    "dividerEmail": "sign in with email",
+    "emailPlaceholder": "you@email.com",
+    "passwordPlaceholder": "Password (min. 6 characters)",
+    "forgotPassword": "Forgot password?",
+    "errorEmail": "Enter a valid email address.",
+    "errorPassword": "Password must be at least 6 characters.",
+    "ctaCreate": "Create account",
+    "ctaLogin": "Log in",
+    "termsPrefix": "By continuing you agree to our ",
+    "terms": "Terms",
+    "and": " & ",
+    "privacy": "Privacy Policy",
+    "termsSuffix": ".",
+    "switchToLogin": "Already have an account? ",
+    "switchToSignup": "New to mitbringen? ",
+    "linkLogin": "Log in",
+    "linkCreate": "Create account"
+  },
+
+  "onboard": {
+    "stepNOfM": "Step {{n}} of {{m}}",
+    "nameHeadline": "Name your first\nshopping list",
+    "nameSub": "Every shop starts with a list. We'll find the cheapest price for everything you add.",
+    "namePlaceholder": "e.g. Weekly shop",
+    "presets": ["Weekly shop", "Farmers' market", "Stock up", "Flatshare shop"],
+    "ctaCreateList": "Create list",
+    "goalHeadline": "Set a monthly\nsavings goal",
+    "goalSub": "We'll track every euro you save against this — and cheer you on as it fills up.",
+    "perMonth": "per month",
+    "ctaStart": "Start saving",
+    "ctaSkip": "I'll decide later"
+  },
+
+  "home": {
+    "greetingMorning": "Good morning,",
+    "greetingFallback": "there",
+    "savedInMonth": "Saved in {{month}}",
+    "weekChip": "↑ {{amount}} this week",
+    "goalPct": "{{pct}}% of {{goal}} goal",
+    "toGo": "{{amount}} to go",
+    "quickNewList": "New list",
+    "quickScanBill": "Scan bill",
+    "sectionYourList": "Your list",
+    "open": "Open",
+    "itemsCount_one": "{{count}} item",
+    "itemsCount_other": "{{count}} items",
+    "readyToShop": "ready to shop",
+    "savesPill": "saves {{amount}}",
+    "emptyListHint": "Empty — tap Open to add items",
+    "sectionWhereToSave": "Where to save this week",
+    "itemsOnOffer_one": "{{count}} of your items on offer",
+    "itemsOnOffer_other": "{{count}} of your items on offer",
+    "bankedToast": "🎉 Banked {{amount}} into your savings"
+  },
+
+  "list": {
+    "searchPlaceholder": "Add an item — \"Milk\", \"Cheese\"…",
+    "emptyTitle": "Your list is empty",
+    "emptySub": "Search above to add items at\ntheir cheapest price.",
+    "noPriceFound": "No price found this week",
+    "youllSave": "You'll save",
+    "basketTotal": "Basket total",
+    "findWhereToShop": "📍 Find where to shop",
+    "addCustom": "Add “{{name}}”",
+    "addCustomSubMatches": "Not the offer you want? Add it anyway",
+    "addCustomSubNone": "No offer found — add to your list anyway",
+    "noOfferPill": "No offer",
+    "noOfferMeta": "Not on offer · any store"
+  },
+
+  "store": {
+    "headerTitle": "Where to shop",
+    "loading": "Finding best deals…",
+    "noDeals": "No matching deals found this week.",
+    "mostYouCanSave": "Most you can save",
+    "acrossItems_one": "across {{count}} item this shop",
+    "acrossItems_other": "across {{count}} items this shop",
+    "compareStores": "Compare stores",
+    "bestChoice": "✦  BEST CHOICE",
+    "itemsOnOffer_one": "{{count}} item on offer",
+    "itemsOnOffer_other": "{{count}} items on offer",
+    "youSave": "You save",
+    "productsOnOffer": "Products on offer here",
+    "spend": "spend {{amount}}",
+    "bankCta": "✓  I shopped — bank {{amount}}"
+  },
+
+  "profile": {
+    "savedWith": "{{amount}} saved with mitbringen",
+    "account": "Account",
+    "preferences": "Preferences",
+    "name": "Name",
+    "email": "Email",
+    "signOut": "Sign out",
+    "language": "Language",
+    "editNameTitle": "Edit name",
+    "editEmailTitle": "Edit email",
+    "yourNameLabel": "Your name",
+    "emailAddressLabel": "Email address",
+    "nameInputPlaceholder": "e.g. Anna Bauer",
+    "emailInputPlaceholder": "you@example.com",
+    "errorEmail": "Enter a valid email address.",
+    "saveChanges": "Save changes",
+    "signOutTitle": "Sign out?",
+    "signOutSub": "You'll need to sign in again to see your lists and savings.",
+    "chooseLanguageTitle": "Language",
+    "chooseLanguageSub": "Pick the language you'd like the app in."
+  },
+
+  "assistant": {
+    "title": "Assistant",
+    "subtitle": "Your personal shopping helper",
+    "comingSoon": "COMING SOON",
+    "exampleQuestion": "Where can I find oat milk on offer near me?",
+    "exampleAnswer": "Hofer nearby has it for €1.19 this week — that's 30% off. It's the cheapest option across all stores near you right now.",
+    "unlocksSoon": "Unlocks soon",
+    "capFindTitle": "Find anything",
+    "capFindDesc": "\"Where's gluten-free pasta near me?\"",
+    "capSwapTitle": "Smarter swaps",
+    "capSwapDesc": "Cheaper alternatives for what's on your list",
+    "capTasteTitle": "Learns your taste",
+    "capTasteDesc": "Suggests foods you'll love, from your shops",
+    "ctaNotify": "Notify me when it's ready",
+    "ctaNotified": "We'll let you know"
+  },
+
+  "lang": {
+    "en": "English",
+    "de": "Deutsch"
+  },
+
+  "tabs": {
+    "home": "Home",
+    "lists": "Lists",
+    "assistant": "Assistant",
+    "profile": "Profile"
+  }
+}

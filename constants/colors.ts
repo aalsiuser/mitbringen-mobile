@@ -33,7 +33,7 @@ export const Colors = {
 
   // Amber — warnings / Billa brand
   amber:       '#f5a623',
-  amberSoft:   '#fdf3e0',
+  amberSoft:   '#fef3c7',
 
   // Legacy aliases for components that still reference these
   appBg:       '#e9edf4',

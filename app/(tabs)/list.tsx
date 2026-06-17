@@ -2,9 +2,11 @@ import { useState, useEffect, useCallback } from 'react'
 import { View, Text, TextInput, TouchableOpacity, FlatList, StyleSheet, ActivityIndicator } from 'react-native'
 import { useRouter } from 'expo-router'
 import { SafeAreaView } from 'react-native-safe-area-context'
+import { useTranslation } from 'react-i18next'
 import { Colors, Shadows } from '@/constants/colors'
 import { useApp } from '@/lib/AppContext'
 import { productsApi } from '@/lib/api'
+import { fmtCurrency } from '@/lib/i18n'
 import type { ApiProduct, ListItem } from '@/lib/types'
 
 const STORE_COLORS: Record<string, string> = {
@@ -15,10 +17,11 @@ const STORE_COLORS: Record<string, string> = {
   billa_plus: Colors.store.billa_plus,
 }
 
-const fmt = (n: number | null | undefined) => n != null ? '€' + n.toFixed(2) : '—'
+const fmt = fmtCurrency
 
 export default function ListTab() {
-  const { listName, items, addItem, removeItem } = useApp()
+  const { listName, items, addItem, addCustomItem, removeItem } = useApp()
+  const { t } = useTranslation()
   const router = useRouter()
   const [q, setQ] = useState('')
   const [focused, setFocused] = useState(false)
@@ -52,6 +55,24 @@ export default function ListTab() {
     }
   }, [addItem, adding])
 
+  const handleAddCustom = useCallback(async (name: string) => {
+    const trimmed = name.trim()
+    if (!trimmed || adding) return
+    setAdding(trimmed)
+    setQ('')
+    setResults([])
+    try {
+      await addCustomItem(trimmed)
+    } finally {
+      setAdding(null)
+    }
+  }, [addCustomItem, adding])
+
+  const qt = q.trim()
+  const hasExactMatch = qt.length > 0 && results.some((r) => r.name.toLowerCase() === qt.toLowerCase())
+  const showCustomRow = qt.length > 0 && !hasExactMatch
+  const dropdownOpen = focused && (results.length > 0 || showCustomRow)
+
   const totalPromo   = items.reduce((s, i) => s + (i.best_price?.promo_price ?? 0), 0)
   const totalRegular = items.reduce((s, i) => s + (i.best_price?.regular_price ?? i.best_price?.promo_price ?? 0), 0)
   const totalSaving  = Math.max(0, totalRegular - totalPromo)
@@ -70,39 +91,63 @@ export default function ListTab() {
             style={s.searchInput}
             value={q}
             onChangeText={setQ}
-            placeholder='Add an item — "Milch", "Käse"…'
+            placeholder={t('list.searchPlaceholder')}
             placeholderTextColor={Colors.ink3}
             onFocus={() => setFocused(true)}
             onBlur={() => setTimeout(() => setFocused(false), 200)}
             returnKeyType="done"
-            onSubmitEditing={() => results[0] && handleAdd(results[0])}
+            onSubmitEditing={() => {
+              if (results[0]) handleAdd(results[0])
+              else if (qt) handleAddCustom(qt)
+            }}
           />
           {searching && <ActivityIndicator size="small" color={Colors.blue} />}
         </View>
 
-        {focused && results.length > 0 && (
+        {dropdownOpen && (
           <View style={s.dropdown}>
-            {results.slice(0, 6).map((p, i) => (
+            {results.slice(0, 6).map((p, i) => {
+              const isLast = i === Math.min(results.length, 6) - 1
+              const showBorder = !isLast || showCustomRow
+              return (
+                <TouchableOpacity
+                  key={`${p.supermarket}-${p.name}`}
+                  onPress={() => handleAdd(p)}
+                  style={[s.dropdownRow, showBorder && s.dropdownBorder]}
+                  activeOpacity={0.7}
+                >
+                  <View style={[s.storeDot, { backgroundColor: STORE_COLORS[p.supermarket] ?? Colors.ink3 }]} />
+                  <View style={{ flex: 1 }}>
+                    <Text style={s.dropdownName}>{p.name}</Text>
+                    <Text style={s.dropdownMeta}>{p.unit ? `${p.unit} · ` : ''}{p.supermarket_name}</Text>
+                  </View>
+                  <View style={{ alignItems: 'flex-end' }}>
+                    <Text style={s.dropdownPrice}>{fmt(p.promo_price)}</Text>
+                    {p.regular_price != null && (
+                      <Text style={s.dropdownRegular}>{fmt(p.regular_price)}</Text>
+                    )}
+                  </View>
+                  <Text style={s.dropdownPlus}>+</Text>
+                </TouchableOpacity>
+              )
+            })}
+            {showCustomRow && (
               <TouchableOpacity
-                key={`${p.supermarket}-${p.name}`}
-                onPress={() => handleAdd(p)}
-                style={[s.dropdownRow, i < Math.min(results.length, 6) - 1 && s.dropdownBorder]}
+                onPress={() => handleAddCustom(qt)}
+                style={[s.dropdownRow, s.dropdownCustomRow]}
                 activeOpacity={0.7}
               >
-                <View style={[s.storeDot, { backgroundColor: STORE_COLORS[p.supermarket] ?? Colors.ink3 }]} />
-                <View style={{ flex: 1 }}>
-                  <Text style={s.dropdownName}>{p.name}</Text>
-                  <Text style={s.dropdownMeta}>{p.unit ? `${p.unit} · ` : ''}{p.supermarket_name}</Text>
+                <View style={s.customPlusTile}>
+                  <Text style={s.customPlusGlyph}>+</Text>
                 </View>
-                <View style={{ alignItems: 'flex-end' }}>
-                  <Text style={s.dropdownPrice}>{fmt(p.promo_price)}</Text>
-                  {p.regular_price != null && (
-                    <Text style={s.dropdownRegular}>{fmt(p.regular_price)}</Text>
-                  )}
+                <View style={{ flex: 1, minWidth: 0 }}>
+                  <Text style={s.dropdownName} numberOfLines={1}>{t('list.addCustom', { name: qt })}</Text>
+                  <Text style={s.dropdownMeta}>
+                    {results.length > 0 ? t('list.addCustomSubMatches') : t('list.addCustomSubNone')}
+                  </Text>
                 </View>
-                <Text style={s.dropdownPlus}>+</Text>
               </TouchableOpacity>
-            ))}
+            )}
           </View>
         )}
       </View>
@@ -113,8 +158,8 @@ export default function ListTab() {
           <View style={s.emptyIcon}>
             <Text style={{ fontSize: 28, color: '#fff' }}>☰</Text>
           </View>
-          <Text style={s.emptyTitle}>Your list is empty</Text>
-          <Text style={s.emptySub}>Search above to add items at their{'\n'}cheapest Vienna price.</Text>
+          <Text style={s.emptyTitle}>{t('list.emptyTitle')}</Text>
+          <Text style={s.emptySub}>{t('list.emptySub')}</Text>
         </View>
       ) : (
         <FlatList
@@ -133,16 +178,16 @@ export default function ListTab() {
           <View style={s.savingsCard}>
             <View style={s.savingsRow}>
               <View>
-                <Text style={s.savingsEyebrow}>You'll save</Text>
+                <Text style={s.savingsEyebrow}>{t('list.youllSave')}</Text>
                 <Text style={s.savingsAmount}>{fmt(totalSaving)}</Text>
               </View>
               <View style={{ alignItems: 'flex-end' }}>
-                <Text style={s.totalLabel}>Basket total</Text>
+                <Text style={s.totalLabel}>{t('list.basketTotal')}</Text>
                 <Text style={s.totalAmount}>{fmt(totalPromo)}</Text>
               </View>
             </View>
             <TouchableOpacity style={s.findBtn} onPress={() => router.push('/store-rec')} activeOpacity={0.85}>
-              <Text style={s.findBtnText}>📍 Find where to shop</Text>
+              <Text style={s.findBtnText}>{t('list.findWhereToShop')}</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -152,6 +197,7 @@ export default function ListTab() {
 }
 
 function ItemRow({ item, onRemove }: { item: ListItem; onRemove: (id: number) => Promise<void> }) {
+  const { t } = useTranslation()
   const bp = item.best_price
   const color = STORE_COLORS[bp?.supermarket ?? ''] ?? Colors.ink3
 
@@ -169,16 +215,22 @@ function ItemRow({ item, onRemove }: { item: ListItem; onRemove: (id: number) =>
               <Text style={s.itemUnit}>{bp.unit ? `${bp.unit} · ` : ''}{bp.supermarket_name}</Text>
             </>
           ) : (
-            <Text style={s.itemUnit}>No price found this week</Text>
+            <Text style={s.itemUnit}>{t('list.noOfferMeta')}</Text>
           )}
         </View>
       </View>
-      <View style={{ alignItems: 'flex-end', marginRight: 8 }}>
-        <Text style={s.itemPromo}>{fmt(bp?.promo_price)}</Text>
-        {bp?.regular_price ? (
-          <Text style={s.itemRegular}>{fmt(bp.regular_price)}</Text>
-        ) : null}
-      </View>
+      {bp ? (
+        <View style={{ alignItems: 'flex-end', marginRight: 8 }}>
+          <Text style={s.itemPromo}>{fmt(bp.promo_price)}</Text>
+          {bp.regular_price ? (
+            <Text style={s.itemRegular}>{fmt(bp.regular_price)}</Text>
+          ) : null}
+        </View>
+      ) : (
+        <View style={s.noOfferPill}>
+          <Text style={s.noOfferPillText}>{t('list.noOfferPill')}</Text>
+        </View>
+      )}
       <TouchableOpacity onPress={() => onRemove(item.id)} style={s.trashBtn} activeOpacity={0.7}>
         <Text style={{ fontSize: 16, color: Colors.ink3 }}>🗑</Text>
       </TouchableOpacity>
@@ -226,6 +278,24 @@ const s = StyleSheet.create({
   dropdownPrice: { fontSize: 15, fontWeight: '700', color: Colors.green, fontFamily: 'SchibstedGrotesk_800ExtraBold', lineHeight: 18, fontVariant: ['tabular-nums'] as any },
   dropdownRegular: { fontSize: 11.5, color: Colors.ink3, textDecorationLine: 'line-through', fontFamily: 'SchibstedGrotesk_400Regular' },
   dropdownPlus: { fontSize: 18, color: Colors.blue, marginLeft: 4, fontWeight: '700' },
+  dropdownCustomRow: { backgroundColor: Colors.inset },
+  customPlusTile: {
+    width: 30, height: 30, borderRadius: 9,
+    backgroundColor: Colors.blueSoft,
+    alignItems: 'center', justifyContent: 'center',
+    flexShrink: 0,
+  },
+  customPlusGlyph: { fontSize: 17, color: Colors.blue, fontWeight: '800', lineHeight: 18 },
+  noOfferPill: {
+    marginRight: 8,
+    backgroundColor: Colors.inset,
+    paddingHorizontal: 10, paddingVertical: 5,
+    borderRadius: 999,
+  },
+  noOfferPillText: {
+    fontSize: 11.5, fontWeight: '700', color: Colors.ink3,
+    fontFamily: 'SchibstedGrotesk_700Bold',
+  },
 
   emptyState: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingTop: 40 },
   emptyIcon: { width: 64, height: 64, borderRadius: 20, backgroundColor: Colors.blue, alignItems: 'center', justifyContent: 'center' },
