@@ -11,13 +11,15 @@
     "preview": {
       "distribution": "internal",
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://api.mitbringen.at/api/v1"
+        "EXPO_PUBLIC_API_URL": "https://api.mitbringen.at/api/v1",
+        "SENTRY_DISABLE_AUTO_UPLOAD": "true"
       }
     },
     "production": {
       "autoIncrement": true,
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://api.mitbringen.at/api/v1"
+        "EXPO_PUBLIC_API_URL": "https://api.mitbringen.at/api/v1",
+        "SENTRY_DISABLE_AUTO_UPLOAD": "true"
       }
     }
   },
