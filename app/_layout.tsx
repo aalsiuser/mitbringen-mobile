@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Stack } from 'expo-router'
 import * as SplashScreen from 'expo-splash-screen'
+import * as Sentry from '@sentry/react-native'
 import {
   SchibstedGrotesk_400Regular,
   SchibstedGrotesk_500Medium,
@@ -12,6 +13,14 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { AppProvider, useApp } from '@/lib/AppContext'
 import { initI18n } from '@/lib/i18n'
 import '../global.css'
+
+Sentry.init({
+  dsn: 'https://d196a193ba516a5ae948bc12d99a874c@o4511596738445312.ingest.de.sentry.io/4511596759941200',
+  environment: __DEV__ ? 'development' : 'production',
+  tracesSampleRate: 0,
+  sendDefaultPii: false,
+  enabled: !__DEV__,
+})
 
 SplashScreen.preventAutoHideAsync()
 
@@ -33,7 +42,7 @@ function RootNavigator() {
   )
 }
 
-export default function RootLayout() {
+function RootLayout() {
   const [loaded, error] = useFonts({
     SchibstedGrotesk_400Regular,
     SchibstedGrotesk_500Medium,
@@ -56,3 +65,5 @@ export default function RootLayout() {
     </QueryClientProvider>
   )
 }
+
+export default Sentry.wrap(RootLayout)
