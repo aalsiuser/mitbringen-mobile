@@ -76,6 +76,7 @@ export type MeResponse = {
   id: number
   name: string | null
   email: string
+  city: string | null
   monthly_savings_goal: number | null
   saved_this_month: number
   shops_this_month: number
@@ -83,7 +84,7 @@ export type MeResponse = {
 
 export const usersApi = {
   me: () => api.get<MeResponse>('/users/me'),
-  update: (fields: Partial<Pick<MeResponse, 'name' | 'email' | 'monthly_savings_goal'>>) =>
+  update: (fields: Partial<Pick<MeResponse, 'name' | 'email' | 'city' | 'monthly_savings_goal'>>) =>
     api.patch<MeResponse>('/users/me', { user: fields }),
 }
 

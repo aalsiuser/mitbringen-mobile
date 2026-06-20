@@ -34,6 +34,13 @@
 
   "onboard": {
     "stepNOfM": "Step {{n}} of {{m}}",
+    "cityStep": "STEP 1 OF 2",
+    "cityHeadline": "Where do you\nshop?",
+    "citySub": "Pick your city so we can pull the right Aktionen & flyers for your local stores.",
+    "cityLabel": "City",
+    "ctaContinue": "Continue",
+    "cityRollout": "More Austrian cities are rolling out soon. We'll notify you when yours goes live.",
+    "citySoon": "SOON",
     "nameHeadline": "Name your first\nshopping list",
     "nameSub": "Every shop starts with a list. We'll find the cheapest price for everything you add.",
     "namePlaceholder": "e.g. Weekly shop",
@@ -80,7 +87,12 @@
     "addCustomSubMatches": "Not the offer you want? Add it anyway",
     "addCustomSubNone": "No offer found — add to your list anyway",
     "noOfferPill": "No offer",
-    "noOfferMeta": "Not on offer · any store"
+    "noOfferMeta": "Not on offer · any store",
+    "gratisFree": "FREE",
+    "gratisFromUnits": "from {{count}} {{unit}}",
+    "gratisDealPricePer": "Deal price per {{unit}}",
+    "gratisOneUnit": "1 {{unit}}",
+    "gratisRowSummary": "from {{count}} at {{price}}"
   },
 
   "store": {

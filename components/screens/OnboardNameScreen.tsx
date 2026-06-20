@@ -31,7 +31,7 @@ export function OnboardNameScreen() {
         <MitbringenWordmark size={17} />
 
         <View style={{ marginTop: 64 }}>
-          <Text style={s.eyebrow}>{t('onboard.stepNOfM', { n: 1, m: 2 })}</Text>
+          <Text style={s.eyebrow}>{t('onboard.stepNOfM', { n: 2, m: 2 })}</Text>
           <Text style={s.headline}>{t('onboard.nameHeadline')}</Text>
           <Text style={s.sub}>{t('onboard.nameSub')}</Text>
         </View>

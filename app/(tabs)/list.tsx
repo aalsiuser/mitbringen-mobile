@@ -8,6 +8,7 @@ import { useApp } from '@/lib/AppContext'
 import { productsApi } from '@/lib/api'
 import { fmtCurrency } from '@/lib/i18n'
 import type { ApiProduct, ListItem } from '@/lib/types'
+import { GratisStrip, GratisRowSummary } from '@/components/ui/GratisBadge'
 
 const STORE_COLORS: Record<string, string> = {
   hofer:      Colors.store.hofer,
@@ -73,8 +74,15 @@ export default function ListTab() {
   const showCustomRow = qt.length > 0 && !hasExactMatch
   const dropdownOpen = focused && (results.length > 0 || showCustomRow)
 
-  const totalPromo   = items.reduce((s, i) => s + (i.best_price?.promo_price ?? 0), 0)
-  const totalRegular = items.reduce((s, i) => s + (i.best_price?.regular_price ?? i.best_price?.promo_price ?? 0), 0)
+  // Honest per-unit price: if a gratis deal gates the promo behind a min quantity,
+  // the user is presumed to be buying 1 unit and pays the single price (no savings).
+  const effectiveUnitPrice = (bp: ApiProduct | null): number => {
+    if (!bp) return 0
+    if (bp.gratis && bp.gratis.min_qty > 1) return bp.gratis.single
+    return bp.promo_price ?? 0
+  }
+  const totalPromo   = items.reduce((s, i) => s + effectiveUnitPrice(i.best_price), 0)
+  const totalRegular = items.reduce((s, i) => s + (i.best_price?.regular_price ?? effectiveUnitPrice(i.best_price)), 0)
   const totalSaving  = Math.max(0, totalRegular - totalPromo)
 
   return (
@@ -109,6 +117,26 @@ export default function ListTab() {
             {results.slice(0, 6).map((p, i) => {
               const isLast = i === Math.min(results.length, 6) - 1
               const showBorder = !isLast || showCustomRow
+              if (p.gratis) {
+                return (
+                  <TouchableOpacity
+                    key={`${p.supermarket}-${p.name}`}
+                    onPress={() => handleAdd(p)}
+                    style={[s.dropdownRowVertical, showBorder && s.dropdownBorder]}
+                    activeOpacity={0.7}
+                  >
+                    <View style={s.dropdownHead}>
+                      <View style={[s.storeDot, { backgroundColor: STORE_COLORS[p.supermarket] ?? Colors.ink3 }]} />
+                      <View style={{ flex: 1, minWidth: 0 }}>
+                        <Text style={s.dropdownName} numberOfLines={1}>{p.display_name ?? p.name}</Text>
+                        <Text style={s.dropdownMeta}>{p.unit ? `${p.unit} · ` : ''}{p.supermarket_name}</Text>
+                      </View>
+                      <Text style={s.dropdownPlus}>+</Text>
+                    </View>
+                    <GratisStrip g={p.gratis} />
+                  </TouchableOpacity>
+                )
+              }
               return (
                 <TouchableOpacity
                   key={`${p.supermarket}-${p.name}`}
@@ -118,7 +146,7 @@ export default function ListTab() {
                 >
                   <View style={[s.storeDot, { backgroundColor: STORE_COLORS[p.supermarket] ?? Colors.ink3 }]} />
                   <View style={{ flex: 1 }}>
-                    <Text style={s.dropdownName}>{p.name}</Text>
+                    <Text style={s.dropdownName}>{p.display_name ?? p.name}</Text>
                     <Text style={s.dropdownMeta}>{p.unit ? `${p.unit} · ` : ''}{p.supermarket_name}</Text>
                   </View>
                   <View style={{ alignItems: 'flex-end' }}>
@@ -219,7 +247,11 @@ function ItemRow({ item, onRemove }: { item: ListItem; onRemove: (id: number) =>
           )}
         </View>
       </View>
-      {bp ? (
+      {bp?.gratis ? (
+        <View style={{ marginRight: 8 }}>
+          <GratisRowSummary g={bp.gratis} />
+        </View>
+      ) : bp ? (
         <View style={{ alignItems: 'flex-end', marginRight: 8 }}>
           <Text style={s.itemPromo}>{fmt(bp.promo_price)}</Text>
           {bp.regular_price ? (
@@ -271,6 +303,8 @@ const s = StyleSheet.create({
     ...Shadows.pop,
   },
   dropdownRow: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 14, paddingVertical: 12 },
+  dropdownRowVertical: { paddingHorizontal: 14, paddingTop: 11, paddingBottom: 12 },
+  dropdownHead: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   dropdownBorder: { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: Colors.line },
   storeDot: { width: 8, height: 8, borderRadius: 999 },
   dropdownName: { fontSize: 15, fontWeight: '600', color: Colors.ink, fontFamily: 'SchibstedGrotesk_700Bold' },

@@ -34,6 +34,13 @@
 
   "onboard": {
     "stepNOfM": "Schritt {{n}} von {{m}}",
+    "cityStep": "SCHRITT 1 VON 2",
+    "cityHeadline": "Wo kaufst du\nein?",
+    "citySub": "Wähle deine Stadt, damit wir die richtigen Aktionen & Flugblätter für deine Märkte vor Ort holen können.",
+    "cityLabel": "Stadt",
+    "ctaContinue": "Weiter",
+    "cityRollout": "Weitere österreichische Städte folgen bald. Wir benachrichtigen dich, sobald deine verfügbar ist.",
+    "citySoon": "BALD",
     "nameHeadline": "Benenne deine erste\nEinkaufsliste",
     "nameSub": "Jeder Einkauf beginnt mit einer Liste. Wir finden den günstigsten Preis für alles, was du hinzufügst.",
     "namePlaceholder": "z. B. Wocheneinkauf",
@@ -80,7 +87,12 @@
     "addCustomSubMatches": "Nicht die richtige Aktion? Trotzdem hinzufügen",
     "addCustomSubNone": "Keine Aktion gefunden — trotzdem zur Liste",
     "noOfferPill": "Keine Aktion",
-    "noOfferMeta": "Nicht in Aktion · jeder Markt"
+    "noOfferMeta": "Nicht in Aktion · jeder Markt",
+    "gratisFree": "GRATIS",
+    "gratisFromUnits": "ab {{count}} {{unit}}",
+    "gratisDealPricePer": "Aktionspreis je {{unit}}",
+    "gratisOneUnit": "1 {{unit}}",
+    "gratisRowSummary": "ab {{count}} je {{price}}"
   },
 
   "store": {

@@ -37,15 +37,28 @@ export interface BasketPlan {
 }
 
 // Real API types
+export interface GratisDeal {
+  label: string             // "3+3", "2+1", "ab 4"
+  unit_name: string         // "Fl.", "Dose", "Stück"
+  single: number            // single-buy price (€8.99)
+  bulk_price: number        // per-unit price when threshold met (€4.49)
+  min_qty: number           // minimum quantity to unlock bulk price
+  note: string | null       // parenthetical terms, e.g. "keine weiteren Rabatte"
+}
+
 export interface ApiProduct {
   supermarket: string
   supermarket_name: string
-  name: string
+  name: string                      // raw extracted flyer text
+  display_name: string | null       // cleaned, user-facing
+  brand: string | null              // brand if any
+  category: string | null           // fixed enum (wine / milk / bread-bakery / ...)
   promo_price: number | null
   regular_price: number | null
   unit: string | null
   valid_from: string | null
   valid_to: string | null
+  gratis: GratisDeal | null
 }
 
 export interface ListItem {
