@@ -74,15 +74,22 @@ export default function ListTab() {
   const showCustomRow = qt.length > 0 && !hasExactMatch
   const dropdownOpen = focused && (results.length > 0 || showCustomRow)
 
-  // Honest per-unit price: if a gratis deal gates the promo behind a min quantity,
-  // the user is presumed to be buying 1 unit and pays the single price (no savings).
-  const effectiveUnitPrice = (bp: ApiProduct | null): number => {
+  // For gratis deals we advertise the per-unit deal value: basket counts the
+  // bulk price (what you pay when qualifying) vs single price (what you'd pay
+  // outside the promo). Same shape grocery apps use — encourages hitting the
+  // threshold, doesn't hide the deal's value behind a "qty=1 pessimism".
+  const effectivePromoPrice = (bp: ApiProduct | null): number => {
     if (!bp) return 0
-    if (bp.gratis && bp.gratis.min_qty > 1) return bp.gratis.single
+    if (bp.gratis && bp.gratis.min_qty > 1) return bp.gratis.bulk_price
     return bp.promo_price ?? 0
   }
-  const totalPromo   = items.reduce((s, i) => s + effectiveUnitPrice(i.best_price), 0)
-  const totalRegular = items.reduce((s, i) => s + (i.best_price?.regular_price ?? effectiveUnitPrice(i.best_price)), 0)
+  const effectiveRegularPrice = (bp: ApiProduct | null): number => {
+    if (!bp) return 0
+    if (bp.gratis && bp.gratis.min_qty > 1) return bp.gratis.single
+    return bp.regular_price ?? bp.promo_price ?? 0
+  }
+  const totalPromo   = items.reduce((s, i) => s + effectivePromoPrice(i.best_price), 0)
+  const totalRegular = items.reduce((s, i) => s + effectiveRegularPrice(i.best_price), 0)
   const totalSaving  = Math.max(0, totalRegular - totalPromo)
 
   return (
