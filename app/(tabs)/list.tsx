@@ -138,7 +138,7 @@ export default function ListTab() {
               if (p.gratis) {
                 return (
                   <TouchableOpacity
-                    key={`${p.supermarket}-${p.name}`}
+                    key={`${p.supermarket}-${p.name}-${i}`}
                     onPress={() => handleAdd(p)}
                     style={[s.dropdownRowVertical, showBorder && s.dropdownBorder]}
                     activeOpacity={0.7}
@@ -157,7 +157,7 @@ export default function ListTab() {
               }
               return (
                 <TouchableOpacity
-                  key={`${p.supermarket}-${p.name}`}
+                  key={`${p.supermarket}-${p.name}-${i}`}
                   onPress={() => handleAdd(p)}
                   style={[s.dropdownRow, showBorder && s.dropdownBorder]}
                   activeOpacity={0.7}
