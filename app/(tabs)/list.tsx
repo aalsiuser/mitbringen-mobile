@@ -74,18 +74,29 @@ export default function ListTab() {
   const showCustomRow = qt.length > 0 && !hasExactMatch
   const dropdownOpen = focused && (results.length > 0 || showCustomRow)
 
-  // For gratis deals we advertise the per-unit deal value: basket counts the
-  // bulk price (what you pay when qualifying) vs single price (what you'd pay
-  // outside the promo). Same shape grocery apps use — encourages hitting the
-  // threshold, doesn't hide the deal's value behind a "qty=1 pessimism".
+  // A gratis line-item = one full deal. Two flavours:
+  //   X+Y FREE  (e.g. "3+3", "1+1") → pay X × single, receive X+Y, save Y × single
+  //   ab N      (e.g. "ab 3")        → pay N × bulk_price, receive N,   save N × (single − bulk_price)
+  const parseXY = (label: string): { paid: number; free: number } | null => {
+    const m = /^\s*(\d+)\s*\+\s*(\d+)\s*$/.exec(label || '')
+    return m ? { paid: parseInt(m[1], 10), free: parseInt(m[2], 10) } : null
+  }
   const effectivePromoPrice = (bp: ApiProduct | null): number => {
     if (!bp) return 0
-    if (bp.gratis && bp.gratis.min_qty > 1) return bp.gratis.bulk_price
+    const g = bp.gratis
+    if (g && g.min_qty > 1) {
+      const xy = parseXY(g.label)
+      return xy ? xy.paid * g.single : g.bulk_price * g.min_qty
+    }
     return bp.promo_price ?? 0
   }
   const effectiveRegularPrice = (bp: ApiProduct | null): number => {
     if (!bp) return 0
-    if (bp.gratis && bp.gratis.min_qty > 1) return bp.gratis.single
+    const g = bp.gratis
+    if (g && g.min_qty > 1) {
+      const xy = parseXY(g.label)
+      return xy ? (xy.paid + xy.free) * g.single : g.single * g.min_qty
+    }
     return bp.regular_price ?? bp.promo_price ?? 0
   }
   const totalPromo   = items.reduce((s, i) => s + effectivePromoPrice(i.best_price), 0)
