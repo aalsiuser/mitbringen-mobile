@@ -58,6 +58,8 @@ export interface ApiProduct {
   unit: string | null
   valid_from: string | null
   valid_to: string | null
+  image_key: string | null          // curated enum key the LLM picked (or null when no match)
+  image_file: string | null         // icon filename slug, always populated — maps to PRODUCT_ICONS in lib/productIcons.ts
   gratis: GratisDeal | null
 }
 

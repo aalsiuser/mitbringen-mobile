@@ -62,12 +62,18 @@ export default function HomeTab() {
   const displayName = user?.name || user?.email?.split('@')[0] || t('home.greetingFallback')
   const initial = (user?.name?.[0] ?? user?.email?.[0] ?? 'A').toUpperCase()
 
+  const hour = new Date().getHours()
+  const greetingKey =
+    hour >= 5 && hour < 12  ? 'home.greetingMorning'
+    : hour >= 12 && hour < 18 ? 'home.greetingAfternoon'
+    : 'home.greetingEvening'
+
   return (
     <SafeAreaView style={s.root} edges={['top']}>
       {/* Top bar */}
       <View style={s.topBar}>
         <View>
-          <Text style={s.greeting}>{t('home.greetingMorning')}</Text>
+          <Text style={s.greeting}>{t(greetingKey)}</Text>
           <Text style={s.greetingName}>{displayName}</Text>
         </View>
         <TouchableOpacity onPress={() => router.push('/(tabs)/profile')} style={s.avatar}>

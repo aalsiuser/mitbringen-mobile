@@ -55,6 +55,8 @@
 
   "home": {
     "greetingMorning": "Guten Morgen,",
+    "greetingAfternoon": "Guten Tag,",
+    "greetingEvening": "Guten Abend,",
     "greetingFallback": "schön dich zu sehen",
     "savedInMonth": "Gespart im {{month}}",
     "weekChip": "↑ {{amount}} diese Woche",

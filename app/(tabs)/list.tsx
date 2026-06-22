@@ -9,6 +9,7 @@ import { productsApi } from '@/lib/api'
 import { fmtCurrency } from '@/lib/i18n'
 import type { ApiProduct, ListItem } from '@/lib/types'
 import { GratisStrip, GratisRowSummary } from '@/components/ui/GratisBadge'
+import { ProductThumb } from '@/components/ui/ProductThumb'
 
 const STORE_COLORS: Record<string, string> = {
   hofer:      Colors.store.hofer,
@@ -144,7 +145,7 @@ export default function ListTab() {
                     activeOpacity={0.7}
                   >
                     <View style={s.dropdownHead}>
-                      <View style={[s.storeDot, { backgroundColor: STORE_COLORS[p.supermarket] ?? Colors.ink3 }]} />
+                      <ProductThumb imageFile={p.image_file} name={p.display_name ?? p.name} size={32} />
                       <View style={{ flex: 1, minWidth: 0 }}>
                         <Text style={s.dropdownName} numberOfLines={1}>{p.display_name ?? p.name}</Text>
                         <Text style={s.dropdownMeta}>{p.unit ? `${p.unit} · ` : ''}{p.supermarket_name}</Text>
@@ -162,7 +163,7 @@ export default function ListTab() {
                   style={[s.dropdownRow, showBorder && s.dropdownBorder]}
                   activeOpacity={0.7}
                 >
-                  <View style={[s.storeDot, { backgroundColor: STORE_COLORS[p.supermarket] ?? Colors.ink3 }]} />
+                  <ProductThumb imageFile={p.image_file} name={p.display_name ?? p.name} size={32} />
                   <View style={{ flex: 1 }}>
                     <Text style={s.dropdownName}>{p.display_name ?? p.name}</Text>
                     <Text style={s.dropdownMeta}>{p.unit ? `${p.unit} · ` : ''}{p.supermarket_name}</Text>
@@ -249,9 +250,7 @@ function ItemRow({ item, onRemove }: { item: ListItem; onRemove: (id: number) =>
 
   return (
     <View style={s.itemRow}>
-      <View style={s.itemTile}>
-        <Text style={s.itemTileLetter}>{item.name[0].toUpperCase()}</Text>
-      </View>
+      <ProductThumb imageFile={bp?.image_file ?? null} name={item.name} size={40} />
       <View style={{ flex: 1, minWidth: 0 }}>
         <Text style={s.itemName} numberOfLines={1}>{item.name}</Text>
         <View style={s.itemMeta}>

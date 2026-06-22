@@ -9,6 +9,7 @@ import { useApp } from '@/lib/AppContext'
 import { api } from '@/lib/api'
 import { useTween } from '@/hooks/useTween'
 import { fmtCurrency, decimalSep } from '@/lib/i18n'
+import { ProductThumb } from '@/components/ui/ProductThumb'
 
 const STORE_COLORS: Record<string, string> = {
   hofer:      Colors.store.hofer,
@@ -26,9 +27,11 @@ const discountPct = (promo: number | null, regular: number | null) => {
 
 interface OptimiseItem {
   name: string
+  display_name: string | null
   unit: string | null
   promo_price: number | null
   regular_price: number | null
+  image_file: string | null
 }
 
 interface OptimiseStop {
@@ -191,11 +194,9 @@ export default function StoreRecScreen() {
                             const pct = discountPct(item.promo_price, item.regular_price)
                             return (
                               <View key={item.name} style={s.productRow}>
-                                <View style={s.productTile}>
-                                  <Text style={s.productLetter}>{item.name[0].toUpperCase()}</Text>
-                                </View>
+                                <ProductThumb imageFile={item.image_file} name={item.display_name ?? item.name} size={34} />
                                 <View style={{ flex: 1, minWidth: 0 }}>
-                                  <Text style={s.productName} numberOfLines={1}>{item.name}</Text>
+                                  <Text style={s.productName} numberOfLines={1}>{item.display_name ?? item.name}</Text>
                                   {item.unit ? <Text style={s.productUnit}>{item.unit}</Text> : null}
                                 </View>
                                 {pct > 0 && (

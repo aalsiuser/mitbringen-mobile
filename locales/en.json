@@ -55,6 +55,8 @@
 
   "home": {
     "greetingMorning": "Good morning,",
+    "greetingAfternoon": "Good afternoon,",
+    "greetingEvening": "Good evening,",
     "greetingFallback": "there",
     "savedInMonth": "Saved in {{month}}",
     "weekChip": "↑ {{amount}} this week",
