@@ -197,7 +197,7 @@ export default function HomeTab() {
                   activeOpacity={0.7}
                 >
                   <View style={[s.storeMonogram, { backgroundColor: store.color }]}>
-                    <Text style={s.storeMonogramText}>{store.name[0]}</Text>
+                    <Text style={s.storeMonogramText} numberOfLines={1} adjustsFontSizeToFit>{store.name}</Text>
                   </View>
                   <View style={{ flex: 1 }}>
                     <Text style={s.storeName}>{store.name}</Text>
@@ -374,8 +374,8 @@ const s = StyleSheet.create({
     paddingVertical: 14,
   },
   storeRowBorder: { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: Colors.line },
-  storeMonogram: { width: 40, height: 40, borderRadius: 13, alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
-  storeMonogramText: { color: '#fff', fontWeight: '700', fontSize: 16, fontFamily: 'SchibstedGrotesk_700Bold' },
+  storeMonogram: { width: 40, height: 40, borderRadius: 13, alignItems: 'center', justifyContent: 'center', flexShrink: 0, paddingHorizontal: 4 },
+  storeMonogramText: { color: '#fff', fontWeight: '800', fontSize: 9, fontFamily: 'SchibstedGrotesk_800ExtraBold', letterSpacing: -0.2 },
   storeName: { fontSize: 15, fontWeight: '700', color: Colors.ink, fontFamily: 'SchibstedGrotesk_700Bold' },
   storeItemCount: { fontSize: 12, color: Colors.ink3, marginTop: 1, fontFamily: 'SchibstedGrotesk_400Regular' },
   storeSaving: { fontSize: 15, fontWeight: '700', color: Colors.green, fontFamily: 'SchibstedGrotesk_800ExtraBold', fontVariant: ['tabular-nums'] as any },

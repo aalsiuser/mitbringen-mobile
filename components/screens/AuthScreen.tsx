@@ -64,7 +64,7 @@ export function AuthScreen() {
         {/* Divider */}
         <View style={s.divider}>
           <View style={s.dividerLine} />
-          <Text style={s.dividerLabel}>{t('auth.dividerEmail')}</Text>
+          <Text style={s.dividerLabel}>{t(isSignup ? 'auth.dividerEmailSignup' : 'auth.dividerEmailLogin')}</Text>
           <View style={s.dividerLine} />
         </View>
 

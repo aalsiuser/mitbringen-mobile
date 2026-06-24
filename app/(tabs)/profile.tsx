@@ -42,6 +42,15 @@ function EditIcon({ size = 17, color = Colors.ink3 }: { size?: number; color?: s
   )
 }
 
+function LockIcon({ size = 17, color = Colors.ink3 }: { size?: number; color?: string }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+      <Path d="M19 11H5a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7a2 2 0 0 0-2-2z" />
+      <Path d="M7 11V7a5 5 0 0 1 10 0v4" />
+    </Svg>
+  )
+}
+
 function LogOutIcon({ size = 20, color = '#fff' }: { size?: number; color?: string }) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
@@ -92,9 +101,24 @@ const eur = fmtCurrency
 
 // ── Field row ─────────────────────────────────────────────────────────────────
 function Field({
-  icon, label, value, onPress,
-}: { icon: 'person' | 'mail' | 'globe'; label: string; value: string; onPress: () => void }) {
+  icon, label, value, onPress, readonly = false,
+}: { icon: 'person' | 'mail' | 'globe'; label: string; value: string; onPress: () => void; readonly?: boolean }) {
   const IconCmp = icon === 'person' ? PersonIcon : icon === 'mail' ? MailIcon : GlobeIcon
+  const TrailingIcon = readonly ? LockIcon : EditIcon
+  if (readonly) {
+    return (
+      <View style={s.prow}>
+        <View style={s.pico}>
+          <IconCmp size={19} color={Colors.ink2} />
+        </View>
+        <View style={{ flex: 1, minWidth: 0 }}>
+          <Text style={s.plab}>{label}</Text>
+          <Text style={s.pval} numberOfLines={1}>{value}</Text>
+        </View>
+        <TrailingIcon size={17} color={Colors.ink3} />
+      </View>
+    )
+  }
   return (
     <TouchableOpacity style={s.prow} onPress={onPress} activeOpacity={0.7}>
       <View style={s.pico}>
@@ -104,7 +128,7 @@ function Field({
         <Text style={s.plab}>{label}</Text>
         <Text style={s.pval} numberOfLines={1}>{value}</Text>
       </View>
-      <EditIcon size={17} color={Colors.ink3} />
+      <TrailingIcon size={17} color={Colors.ink3} />
     </TouchableOpacity>
   )
 }
@@ -306,7 +330,7 @@ export default function ProfileScreen() {
         <View style={[s.card, { padding: 3 }]}>
           <Field icon="person" label={t('profile.name')} value={displayName || '—'} onPress={editName} />
           <View style={s.divider} />
-          <Field icon="mail" label={t('profile.email')} value={displayEmail} onPress={editEmail} />
+          <Field icon="mail" label={t('profile.email')} value={displayEmail} onPress={editEmail} readonly />
         </View>
 
         {/* preferences section */}
