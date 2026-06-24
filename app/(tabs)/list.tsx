@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { View, Text, TextInput, TouchableOpacity, FlatList, StyleSheet, ActivityIndicator } from 'react-native'
+import { View, Text, TextInput, TouchableOpacity, FlatList, ScrollView, StyleSheet, ActivityIndicator } from 'react-native'
 import { useRouter } from 'expo-router'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useTranslation } from 'react-i18next'
@@ -133,8 +133,14 @@ export default function ListTab() {
 
         {dropdownOpen && (
           <View style={s.dropdown}>
-            {results.slice(0, 6).map((p, i) => {
-              const isLast = i === Math.min(results.length, 6) - 1
+            <ScrollView
+              style={{ maxHeight: 340 }}
+              keyboardShouldPersistTaps="handled"
+              nestedScrollEnabled
+              showsVerticalScrollIndicator={false}
+            >
+            {results.map((p, i) => {
+              const isLast = i === results.length - 1
               const showBorder = !isLast || showCustomRow
               if (p.gratis) {
                 return (
@@ -195,6 +201,7 @@ export default function ListTab() {
                 </View>
               </TouchableOpacity>
             )}
+            </ScrollView>
           </View>
         )}
       </View>
