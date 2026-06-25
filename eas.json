@@ -26,7 +26,8 @@
   "submit": {
     "production": {
       "ios": {
-        "ascApiKeyPath": "~/.config/eas/asc_key.p8",
+        "ascAppId": "6784386691",
+        "ascApiKeyPath": "/Users/wamci/.config/eas/asc_key.p8",
         "ascApiKeyId": "U7QD4QGN38",
         "ascApiKeyIssuerId": "31be26c0-ef55-4288-b486-0e89aa299b69"
       }
