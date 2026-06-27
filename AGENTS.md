@@ -104,15 +104,51 @@ Available API objects: `usersApi`, `listsApi`, `itemsApi`, `savingsApi`, `api` (
 
 ## EAS Builds & Submission
 
+### iOS
+
 ```
-eas build --profile development   # Dev client build
-eas build --profile preview       # Internal distribution
-eas build --profile production    # App Store / Play Store build (auto-increments build number)
-eas submit --platform ios         # Submit to TestFlight via ASC API key
+# Dev client (internal)
+eas build --profile development --platform ios
+
+# Preview / internal TestFlight
+eas build --profile preview --platform ios
+
+# Production (auto-increments build number)
+eas build --profile production --platform ios
+
+# Submit latest production build to TestFlight
+eas submit --platform ios --profile production
 ```
 
+### Android
+
+```
+# Dev client (internal)
+eas build --profile development --platform android
+
+# Preview / internal APK
+eas build --profile preview --platform android
+
+# Production AAB (Google Play)
+eas build --profile production --platform android
+
+# Submit latest production build to Google Play
+eas submit --platform android --profile production
+```
+
+### Both platforms at once
+
+```
+eas build --profile production --platform all
+```
+
+### Notes
+
 - `appVersionSource: "remote"` — version/build numbers are managed by EAS, not locally.
-- iOS bundle ID: `com.mitbringen.myapp` | EAS project ID: `8bf66ac5-788f-4966-a7e5-9269ea747678`
+- iOS bundle ID: `com.mitbringen.myapp`
+- Android package: `com.mitbringen.myapp`
+- EAS project ID: `8bf66ac5-788f-4966-a7e5-9269ea747678`
+- iOS submission uses ASC API key stored at `~/.config/eas/asc_key.p8`
 
 ---
 
