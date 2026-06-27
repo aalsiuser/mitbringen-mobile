@@ -13,6 +13,7 @@ interface User {
 }
 
 interface AppState {
+  initialized: boolean
   phase: Phase
   setPhase: (p: Phase) => void
   user: User | null
@@ -43,6 +44,7 @@ interface AppState {
 const AppContext = createContext<AppState | null>(null)
 
 export function AppProvider({ children }: { children: ReactNode }) {
+  const [initialized, setInitialized] = useState(false)
   const [phase, setPhase] = useState<Phase>('auth')
   const [user, setUser] = useState<User | null>(null)
   const [currentListId, setCurrentListId] = useState<number | null>(null)
@@ -79,7 +81,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       } catch (e: any) {
         if (e.message === 'UNAUTHORIZED') setPhase('auth')
       }
-    })
+    }).finally(() => setInitialized(true))
   }, [])
 
   // Load items when list changes
@@ -166,6 +168,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   return (
     <AppContext.Provider value={{
+      initialized,
       phase, setPhase,
       user, signUp, signIn, signOut, updateProfile, saveCity,
       saveListName, saveGoal,

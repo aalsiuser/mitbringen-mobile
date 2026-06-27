@@ -42,6 +42,17 @@ function RootNavigator() {
   )
 }
 
+function AppInitializer() {
+  const { initialized } = useApp()
+
+  useEffect(() => {
+    if (initialized) SplashScreen.hideAsync()
+  }, [initialized])
+
+  if (!initialized) return null
+  return <RootNavigator />
+}
+
 function RootLayout() {
   const [loaded, error] = useFonts({
     SchibstedGrotesk_400Regular,
@@ -53,14 +64,13 @@ function RootLayout() {
 
   useEffect(() => { if (error) throw error }, [error])
   useEffect(() => { initI18n().then(() => setI18nReady(true)) }, [])
-  useEffect(() => { if (loaded && i18nReady) SplashScreen.hideAsync() }, [loaded, i18nReady])
 
   if (!loaded || !i18nReady) return null
 
   return (
     <QueryClientProvider client={queryClient}>
       <AppProvider>
-        <RootNavigator />
+        <AppInitializer />
       </AppProvider>
     </QueryClientProvider>
   )
